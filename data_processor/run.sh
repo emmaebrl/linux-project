@@ -1,2 +1,3 @@
-source ./venv/bin/activate
-python process_data.py
+echo "--------STEP 3: Processing  data---------"
+python processor.py
+sleep 3
