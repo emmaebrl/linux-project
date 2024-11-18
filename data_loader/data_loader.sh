@@ -2,10 +2,11 @@
 # on peut lui passer un argument pour écraser les données existantes ou non si déjà présente (overwrite) -> à changer dans le fichier de config loader.conf
 
 source ./loader.conf
-echo "Overwrite is set to ${overwrite}. So if data already exists, it will be downloaded again."
+echo "Overwrite is set to ${overwrite}."
 
 update=false
 if [ ${overwrite} == "true" ]; then
+  echo "Overwrite is set to true. So if the data already exists, it will be downloaded again."
   update=true
 fi
 
