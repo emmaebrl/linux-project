@@ -4,6 +4,7 @@
 
 # while true 
 #   do
+source .venv/bin/activate #activer l'environnement virtuel
 echo "Downloading data"
 cd data_loader
 bash run.sh\
