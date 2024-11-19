@@ -1,3 +1,3 @@
 echo "--------STEP 3: Processing  data---------"
-python processor.py
+python processor.py "$1"
 sleep 3
