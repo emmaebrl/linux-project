@@ -2,6 +2,8 @@
 import pandas as pd
 import sys
 from difflib import get_close_matches
+import codecs
+
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 # Récupérer la recherche de l'utilisateur
