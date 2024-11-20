@@ -61,4 +61,14 @@ if data.empty:
 
 # Affichage des résultats
 print("------------------RESULTATS------------------")
-print(f"Informations about {research} --> \n Historical name : {data['historique'].values[0]} \n Original name : {data['orig'].values[0]}")
+data.fillna("L'information n'est pas disponible.", inplace=True)
+print(
+    f"Informations about {research} --> \n"
+    f"Historical name : {data['historique'].values[0]} \n"
+    f"Origin of the name : {data['orig'].values[0]}\n"
+    f"Type of road : {data['typvoie'].values[0]} \n"
+    f"District : {data['arrdt'].values[0]} \n"
+    f"Neighborhood : {data['quartier'].values[0]}\n"
+    f"Length : {data['longueur'].values[0]} \n"
+    f"Width : {data['largeur'].values[0]}"
+)
