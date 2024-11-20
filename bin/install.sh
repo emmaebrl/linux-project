@@ -1,5 +1,18 @@
-# Fichier à lancer en premier pour ""installer"" l'application: dépendances, dossiers, docker etc ?? Pas très clair encore pour moi
+#dos2unix bin/install.sh a lancer avant
 #!/bin/bash
+echo "Converting files with Windows line endings to Unix format..."
+files_to_convert=$(grep -Ilr $'\r' --exclude-dir={.git,.venv} .)
+
+if [ -n "$files_to_convert" ]; then
+    for file in $files_to_convert; do
+        echo "Converting $file to Unix format"
+        dos2unix "$file"
+    done
+else
+    echo "No files with Windows line endings found."
+fi
+
+# Fichier à lancer en premier pour ""installer"" l'application: dépendances, dossiers, docker etc ?? Pas très clair encore pour moi
 # Ces commandes permettent de créer un environnement virtuel et d'installer les dépendances du projet.
 # Je crois qu'elles seront enlévées une fois qu'on utilisera Docker pour lancer l'application.
 
