@@ -3,8 +3,7 @@ import pandas as pd
 import sys
 from difflib import get_close_matches
 
-sys.stdout.reconfigure(encoding='utf-8')
-
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 # Récupérer la recherche de l'utilisateur
 research = sys.argv[1].strip().upper()
 
