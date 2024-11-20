@@ -108,11 +108,11 @@ print(filtered_data_parking[filtered_data_parking["typo_match"].notna()])
 
 # Effectuer la jointure
 merged_data = pd.merge(
-    filtered_data_parking,
     filtered_data,
-    left_on="typo_match",
-    right_on="typo_normalized",
-    how="inner"
+    filtered_data_parking,
+    left_on="typo_normalized",
+    right_on="typo_match",
+    how="outer"
 )
 
 # Sauvegarder merged_data
