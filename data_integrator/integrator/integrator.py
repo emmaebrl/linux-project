@@ -7,7 +7,7 @@ staged_file_path = "../../data/staged_data.csv"
 
 print("Integrating raw data from", raw_data_path)
 data = pd.read_csv(raw_data_path)
-data = data[["typo", "orig", "historique"]]
+data = data[["typo", "orig", "historique", "typvoie","arrdt", "quartier", "longueur", "largeur"]]
 
 # à mettre ici : Les transformations des données pour les rendre utilisables (filtres, concaténations, etc.)
 
