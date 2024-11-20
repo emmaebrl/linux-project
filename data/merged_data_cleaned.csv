@@ -1,0 +1,8 @@
+ID Parking,Nom,Code INSEE,Adresse,URL,Type Usagers,Gratuit,Nombre de Places,nb_pr,Places PMR,Places Voitures Électriques,nb_velo,nb_2r_el,nb_autopartage,nb_2_rm,nb_covoit,Hauteur Max (cm),num_siret,Xlong,Ylat,tarif_pmr,Tarif 1h (€),tarif_2h,tarif_3h,tarif_4h,Tarif 24h (€),abo_resident,abo_non_resident,Type Ouvrage,Adresse Normalisée,Correspondance Typo,typo,Origine,Historique,Typo Normalisée,Description
+75104-P-124,BAUDOYER,75104,25 ter rue de Rivoli. 75004. Paris,http://realpark.fr/parking/baudoyer.html,tous,0,317,0.0,6.0,0.0,6.0,0.0,0.0,11.0,0.0,195.0,39327657100030.0,2.355399,48.856476,,4.6,9.2,14.0,18.8,39.6,,249.0,ouvrage,25terruederivoli75004paris,ruederivoli,RUE DE RIVOLI,"Victoire remportée par l'armée française, commandée par Bonaparte, sur les Autrichiens, les 14 et 15 janvier 1797.",,ruederivoli,"Nom : BAUDOYER
+Adresse : 25 ter rue de Rivoli. 75004. Paris
+Nombre de Places : 317
+Tarif 1h : 4.60 €
+Tarif 24h : 39.60 €
+Type Usagers : tous
+Gratuit : 0"
