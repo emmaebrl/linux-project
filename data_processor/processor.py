@@ -3,7 +3,10 @@ import sys
 import re
 from unidecode import unidecode
 from difflib import get_close_matches
+import codecs
 
+
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 # Récupérer la recherche de l'utilisateur
 research = sys.argv[1].strip().upper()
 

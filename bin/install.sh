@@ -25,6 +25,7 @@ else
     python3 -m venv .venv #créer un environnement virtuel
 fi
 source .venv/bin/activate #activer l'environnement virtuel
+pip install --upgrade pip
 pip install -r requirements.txt #installer les dépendances
 
 
