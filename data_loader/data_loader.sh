@@ -17,6 +17,7 @@ else
  curl -X 'GET' \
   'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/denominations-emprises-voies-actuelles/exports/csv?delimiter=%2C&list_separator=%2C&quote_all=false&with_bom=true' \
   -H 'accept: */*' -o ../data/streets_raw_data.csv
-  fi
+  
+
 
 echo "Data are saved and ready in data/streets_raw_data.csv" # Nom provisoire lol
