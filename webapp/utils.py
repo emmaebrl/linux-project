@@ -4,14 +4,23 @@ from difflib import get_close_matches
 DATA_PATH = "data/street_data_staged.csv"
 DATA_PATH_PARKING = "data/parking_data_staged.csv"
 
+def normalize_string(s):
+    if pd.isna(s):
+        return ""
+    s = unidecode(s) 
+    s = re.sub(r'[^\w]', '', s) 
+    s = s.lower()
+    return s
+
+
 data = pd.read_csv(DATA_PATH)
 data_parking = pd.read_csv(DATA_PATH_PARKING)
 
 def get_informations(street):
     """Retourne des informations sur une rue, avec suggestions si nécessaire."""
-    research = street.strip().upper()
-    if research not in data["typo"].values:
-        suggestions = get_close_matches(research, data["typo"].unique(), n=1, cutoff=0.7)
+    research = normalize_string(street)
+    if research not in data["typo_normalize"].values:
+        suggestions = get_close_matches(research, data["typo_normalize"].unique(), n=3, cutoff=0.7)
         if suggestions:
             return None, None, None, None, None, None, None, suggestions[0], None
         else:
