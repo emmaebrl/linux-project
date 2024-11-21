@@ -78,11 +78,13 @@ filtered_parking_data = parking_data_staged[parking_data_staged["typo_match"].no
 
 filtered_parking_data.rename(columns=column_renaming, inplace=True)
 
+print(filtered_parking_data.columns)
+
 
 # Conversion des colonnes numériques
 numeric_columns = [
     "Nombre de Places", "Places PMR", "Places Voitures Électriques",
-    "Tarif 1h (€)", "Tarif 24h (€)", "Hauteur Max (cm)"
+    "Tarif 1h (€)","Tarif 2h (€)","Tarif 3h (€)","Tarif 4h (€)", "Tarif 24h (€)", "Hauteur Max (cm)"
 ]
 filtered_parking_data[numeric_columns] = filtered_parking_data[numeric_columns].apply(pd.to_numeric, errors="coerce")
 
@@ -95,11 +97,15 @@ if not filtered_parking_data.empty:
     filtered_parking_data["Description"] = (
         "Nom : " + filtered_parking_data["Nom"].astype(str) + "\n" +
         "Adresse : " + filtered_parking_data["Adresse"].astype(str) + "\n" +
+        "Arrondissement : " + filtered_parking_data["Arrondissement"].astype(str) + "\n" +
         "Nombre de Places : " + filtered_parking_data["Nombre de Places"].astype(str) + "\n" +
         "Tarif 1h : " + filtered_parking_data["Tarif 1h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
+        "Tarif 2h : " + filtered_parking_data["Tarif 2h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
+        "Tarif 3h : " + filtered_parking_data["Tarif 3h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
+        "Tarif 4h : " + filtered_parking_data["Tarif 4h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
         "Tarif 24h : " + filtered_parking_data["Tarif 24h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
         "Type Usagers : " + filtered_parking_data["Type Usagers"].fillna("Non Spécifié").astype(str) + "\n" +
-        "Gratuit : " + filtered_parking_data["Gratuit"].astype(str)
+        "Gratuit : " + filtered_parking_data["Gratuit"].astype(str) + "\n"
 )
 
 # Afficher les résultats

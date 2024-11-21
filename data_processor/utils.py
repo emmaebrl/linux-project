@@ -11,6 +11,9 @@ column_renaming = {
     "nb_voitures_electriques": "Places Voitures Électriques",
     "hauteur_max": "Hauteur Max (cm)",
     "tarif_1h": "Tarif 1h (€)",
+    "tarif_2h": "Tarif 2h (€)",
+    "tarif_3h": "Tarif 3h (€)",
+    "tarif_4h": "Tarif 4h (€)",
     "tarif_24h": "Tarif 24h (€)",
     "type_ouvrage": "Type Ouvrage",
     "adresse_normalized": "Adresse Normalisée",
@@ -19,8 +22,6 @@ column_renaming = {
     "orig": "Origine",
     "historique": "Historique", 
     "typvoie": "Type de Voie",
-    "arrdt": "Arrondissement",
-    "quartier": "Quartier",
     "longueur": "Longueur",
     "largeur": "Largeur"
 }
