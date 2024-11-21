@@ -4,7 +4,7 @@ import sys
 from difflib import get_close_matches
 
 
-DATA_PATH = "data/staged_data.csv"
+DATA_PATH = "data/street_data_staged.csv"
 data = pd.read_csv(DATA_PATH)
 
 def get_informations(street):
