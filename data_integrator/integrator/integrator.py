@@ -12,6 +12,9 @@ def normalize_string(s):
     s = s.lower()
     return s
 
+
+
+
 # Chemin des fichiers de données
 street_data_raw_path = "../../data/street_data_raw.csv"
 street_data_staged_path = "../../data/street_data_staged.csv"
