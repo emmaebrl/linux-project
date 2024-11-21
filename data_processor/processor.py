@@ -6,21 +6,19 @@ from difflib import get_close_matches
 import codecs
 from utils import column_renaming
 
-# Activer l'UTF-8
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 
-
-# Récupérer la recherche de l'utilisateur
 research = sys.argv[1].strip().upper()
 print("Extracting information about", research)
+
 street_data_staged_path = "../data/street_data_staged.csv"
+
 parking_data_staged_path = "../data/parking_data_staged.csv"
 
 street_data_staged = pd.read_csv(street_data_staged_path)
 parking_data_staged = pd.read_csv(parking_data_staged_path, sep=",")
 
 
-# Vérification de la correspondance exacte
 if research not in street_data_staged["typo"].values:
     print(f"No exact match found for '{research}'. Looking for close matches...")
     suggestions = get_close_matches(research, street_data_staged["typo"].unique(), n=3, cutoff=0.6)

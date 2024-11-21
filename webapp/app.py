@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
+import folium
+from streamlit_folium import folium_static
 from utils import get_informations
 
 st.title("Recherche d'informations sur une rue")
 
-# Initialisation des variables de session
 if "suggestion" not in st.session_state:
     st.session_state.suggestion = None
 if "current_input" not in st.session_state:
@@ -16,7 +17,7 @@ user_input = st.text_input("Entrez une rue dans la barre de recherche :")
 # Bouton de recherche
 if st.button("Rechercher"):
     if user_input.strip():  # Vérifie que l'utilisateur a saisi un texte
-        historique, orig, typevoie, arrdt, quartier, longueur, largeur, suggestion = get_informations(user_input)
+        historique, orig, typevoie, arrdt, quartier, longueur, largeur, suggestion, parking_data = get_informations(user_input)
         st.session_state.current_input = user_input  # Sauvegarde de l'entrée actuelle
         st.session_state.suggestion = suggestion    # Sauvegarde de la suggestion
 
@@ -26,7 +27,6 @@ if st.button("Rechercher"):
         if historique and orig:
             st.success(f"Informations sur {user_input} :")
             
-            # Section Caractéristiques
             with st.expander("Voir les caractéristiques"):
                 st.write(f"- **Nom historique :** {historique}")
                 st.write(f"- **Nom original :** {orig}")
@@ -36,15 +36,28 @@ if st.button("Rechercher"):
                 st.write(f"- **Longueur :** {longueur}")
                 st.write(f"- **Largeur :** {largeur}")
             
-            # Section Parking
+            # Menu déroulant pour la map du Parking
             with st.expander("Parkings à proximité"):
-                # Exemple de données fictives pour les parkings
-                parkings = [
-                    {"Nom": "Parking A", "Adresse": "123 Rue Exemple", "Places": 50},
-                    {"Nom": "Parking B", "Adresse": "456 Rue Exemple", "Places": 30},
-                ]
-                parking_df = pd.DataFrame(parkings)
-                st.table(parking_df)
+                if not parking_data.empty:
+                    localisation = [parking_data.iloc[0]['Ylat'], parking_data.iloc[0]['Xlong']]
+                    m = folium.Map(location=localisation, zoom_start=15)
+                    
+                    for _, row in parking_data.iterrows():
+                        # Information affichée dans la pop-up en HTML
+                        popup_content = f"""
+                            <b>Tarif 1h:</b> {row['tarif_1h']} €<br>
+                            <b>Hauteur max:</b> {row['hauteur_max']} cm
+                            """
+                        # Forme du Marker
+                        folium.Marker(
+                            location=[row['Ylat'], row['Xlong']],
+                            popup=folium.Popup(popup_content),
+                            tooltip=row['adresse']
+                        ).add_to(m)
+                    
+                    folium_static(m)
+                else:
+                    st.write("Aucun parking trouvé à proximité.")
         elif not suggestion:
             st.error("Aucune information trouvée pour cette rue. Veuillez vérifier votre saisie.")
     else:
@@ -54,11 +67,10 @@ if st.button("Rechercher"):
 if st.session_state.suggestion:
     if st.button(f"Rechercher la suggestion '{st.session_state.suggestion}'"):
         # Recherche avec la suggestion sauvegardée
-        historique, orig, typevoie, arrdt, quartier, longueur, largeur, _ = get_informations(st.session_state.suggestion)
+        historique, orig, typevoie, arrdt, quartier, longueur, largeur, _, parking_data = get_informations(st.session_state.suggestion)
         if historique and orig:
             st.success(f"Informations sur {st.session_state.suggestion} :")
             
-            # Section Caractéristiques
             with st.expander("Voir les caractéristiques"):
                 st.write(f"- **Nom historique :** {historique}")
                 st.write(f"- **Nom original :** {orig}")
@@ -68,14 +80,24 @@ if st.session_state.suggestion:
                 st.write(f"- **Longueur :** {longueur}")
                 st.write(f"- **Largeur :** {largeur}")
             
-            # Section Parking
             with st.expander("Parkings à proximité"):
-                # Exemple de données fictives pour les parkings
-                parkings = [
-                    {"Nom": "Parking C", "Adresse": "789 Rue Exemple", "Places": 40},
-                    {"Nom": "Parking D", "Adresse": "321 Rue Exemple", "Places": 20},
-                ]
-                parking_df = pd.DataFrame(parkings)
-                st.table(parking_df)
+                if not parking_data.empty:
+                    map_center = [parking_data.iloc[0]['Ylat'], parking_data.iloc[0]['Xlong']]
+                    m = folium.Map(location=map_center, zoom_start=15)
+                    
+                    for _, row in parking_data.iterrows():
+                        popup_content = f"""
+                            <b>Tarif 1h:</b> {row['tarif_1h']} €<br>
+                            <b>Hauteur max:</b> {row['hauteur_max']} cm
+                            """
+                        folium.Marker(
+                            location=[row['Ylat'], row['Xlong']],
+                            popup=folium.Popup(popup_content),
+                            tooltip=row['adresse']
+                        ).add_to(m)
+                    
+                    folium_static(m)
+                else:
+                    st.write("Aucun parking trouvé à proximité.")
         else:
             st.error(f"Aucune information trouvée pour '{st.session_state.suggestion}'.")
