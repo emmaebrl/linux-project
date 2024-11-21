@@ -10,9 +10,6 @@ bash run.sh\
 && cd ../data_integrator\
 && bash run.sh \
 && echo "Data integrated" \
-&& echo "Processing data" \
-&& cd ../data_processor\
-&& bash run.sh "$1"\
-&& echo "Processed data" \
-&& cd ../bin \
-&& echo "Data processing succeeded"
+&& cd ..\
+&& echo "Running the app" \
+&& streamlit run webapp/app.py\
