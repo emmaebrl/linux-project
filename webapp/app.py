@@ -10,15 +10,13 @@ if "suggestion" not in st.session_state:
 if "current_input" not in st.session_state:
     st.session_state.current_input = None
 
-# Saisie de l'utilisateur
 user_input = st.text_input("Entrez une rue dans la barre de recherche :")
 
-# Bouton de recherche
 if st.button("Rechercher"):
-    if user_input.strip():  # Vérifie que l'utilisateur a saisi un texte
+    if user_input.strip():
         historique, orig, typevoie, arrdt, quartier, longueur, largeur, suggestion = get_informations(user_input)
-        st.session_state.current_input = user_input  # Sauvegarde de l'entrée actuelle
-        st.session_state.suggestion = suggestion    # Sauvegarde de la suggestion
+        st.session_state.current_input = user_input 
+        st.session_state.suggestion = suggestion 
 
         if suggestion:
             st.warning(f"Did you mean: **{suggestion}**?")
@@ -26,8 +24,11 @@ if st.button("Rechercher"):
         if historique and orig:
             st.success(f"Informations sur {user_input} :")
             
-            # Section Caractéristiques
-            with st.expander("Voir les caractéristiques"):
+            # Utilisation de tabs
+            tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])
+            
+            # Contenu du premier onglet
+            with tab1:
                 st.write(f"- **Nom historique :** {historique}")
                 st.write(f"- **Nom original :** {orig}")
                 st.write(f"- **Type de voie :** {typevoie}")
@@ -36,8 +37,8 @@ if st.button("Rechercher"):
                 st.write(f"- **Longueur :** {longueur}")
                 st.write(f"- **Largeur :** {largeur}")
             
-            # Section Parking
-            with st.expander("Parkings à proximité"):
+            # Contenu du second onglet
+            with tab2:
                 # Exemple de données fictives pour les parkings
                 parkings = [
                     {"Nom": "Parking A", "Adresse": "123 Rue Exemple", "Places": 50},
@@ -58,8 +59,11 @@ if st.session_state.suggestion:
         if historique and orig:
             st.success(f"Informations sur {st.session_state.suggestion} :")
             
-            # Section Caractéristiques
-            with st.expander("Voir les caractéristiques"):
+            # Utilisation de tabs
+            tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])
+            
+            # Contenu du premier onglet
+            with tab1:
                 st.write(f"- **Nom historique :** {historique}")
                 st.write(f"- **Nom original :** {orig}")
                 st.write(f"- **Type de voie :** {typevoie}")
@@ -68,8 +72,8 @@ if st.session_state.suggestion:
                 st.write(f"- **Longueur :** {longueur}")
                 st.write(f"- **Largeur :** {largeur}")
             
-            # Section Parking
-            with st.expander("Parkings à proximité"):
+            # Contenu du second onglet
+            with tab2:
                 # Exemple de données fictives pour les parkings
                 parkings = [
                     {"Nom": "Parking C", "Adresse": "789 Rue Exemple", "Places": 40},
