@@ -18,6 +18,7 @@ print(f"Extracting information about {research}")
 
 # Chemins des fichiers
 street_data_staged_path = "../data/street_data_staged.csv"
+
 parking_data_staged_path = "../data/parking_data_staged.csv"
 
 # Charger les données
@@ -28,7 +29,6 @@ except FileNotFoundError as e:
     print(f"Error: {e}")
     sys.exit(1)
 
-# Vérification de la correspondance exacte
 if research not in street_data_staged["typo"].values:
     print(f"No exact match found for '{research}'. Looking for close matches...")
     suggestions = get_close_matches(research, street_data_staged["typo"].unique(), n=3, cutoff=0.6)
