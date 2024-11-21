@@ -1,6 +1,6 @@
 import pandas as pd
-import json
-import sys
+# import json
+# import sys
 import re
 from unidecode import unidecode
 
@@ -29,7 +29,9 @@ street_data.to_csv(street_data_staged_path, index=False)
 # Intégration des données sur les parkings
 print("Integrating Parking raw data from", parking_data_raw_path)
 parking_data = pd.read_csv(parking_data_raw_path, sep=";")
-parking_data = parking_data[parking_data["insee"].astype(str).str.startswith("75")].copy() # Filter on Paris
+parking_data = parking_data[parking_data["insee"].astype(str).str.startswith("75")].copy()
+parking_data["gratuit"] = parking_data["gratuit"].map({1: "Oui", 0: "Non"})
+parking_data["Arrondissement"] = parking_data["insee"].astype(str).str[-2:] + "e"
 parking_data["adresse_normalized"] = parking_data["adresse"].apply(normalize_string)
 parking_data.to_csv(parking_data_staged_path, index=False)
 print(f"Filtered parking data saved to {parking_data_staged_path}")
