@@ -1,7 +1,5 @@
 import pandas as pd
 import sys
-import re
-from unidecode import unidecode
 from difflib import get_close_matches
 import codecs
 from utils import column_renaming
