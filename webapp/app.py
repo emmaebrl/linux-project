@@ -1,52 +1,81 @@
 import streamlit as st
+import pandas as pd
+from utils import get_informations
 
+st.title("Recherche d'informations sur une rue")
 
-def main():
-    # Title of the app
-    st.title("Simple Testing Interface")
+# Initialisation des variables de session
+if "suggestion" not in st.session_state:
+    st.session_state.suggestion = None
+if "current_input" not in st.session_state:
+    st.session_state.current_input = None
 
-    # Section for text input
-    st.subheader("Text Input Test")
-    user_text = st.text_input("Enter some text", value="Sample text")
-    if st.button("Submit Text"):
-        st.write(f"You entered: {user_text}")
+# Saisie de l'utilisateur
+user_input = st.text_input("Entrez une rue dans la barre de recherche :")
 
-    # Section for number input
-    st.subheader("Number Input Test")
-    user_number = st.number_input(
-        "Enter a number", min_value=0, max_value=100, value=50
-    )
-    if st.button("Submit Number"):
-        st.write(f"You entered: {user_number}")
+# Bouton de recherche
+if st.button("Rechercher"):
+    if user_input.strip():  # Vérifie que l'utilisateur a saisi un texte
+        historique, orig, typevoie, arrdt, quartier, longueur, largeur, suggestion = get_informations(user_input)
+        st.session_state.current_input = user_input  # Sauvegarde de l'entrée actuelle
+        st.session_state.suggestion = suggestion    # Sauvegarde de la suggestion
 
-    # Section for selecting options
-    st.subheader("Options Test")
-    options = ["Option 1", "Option 2", "Option 3"]
-    selected_option = st.selectbox("Choose an option", options)
-    st.write(f"You selected: {selected_option}")
+        if suggestion:
+            st.warning(f"Did you mean: **{suggestion}**?")
 
-    # Section for slider input
-    st.subheader("Slider Test")
-    slider_value = st.slider("Choose a value", min_value=0, max_value=100, value=25)
-    st.write(f"Slider value: {slider_value}")
-
-    # Section for checkbox
-    st.subheader("Checkbox Test")
-    agree = st.checkbox("I agree to the terms and conditions")
-    if agree:
-        st.write("Thank you for agreeing!")
+        if historique and orig:
+            st.success(f"Informations sur {user_input} :")
+            
+            # Section Caractéristiques
+            with st.expander("Voir les caractéristiques"):
+                st.write(f"- **Nom historique :** {historique}")
+                st.write(f"- **Nom original :** {orig}")
+                st.write(f"- **Type de voie :** {typevoie}")
+                st.write(f"- **Arrondissement :** {arrdt}")
+                st.write(f"- **Quartier :** {quartier}")
+                st.write(f"- **Longueur :** {longueur}")
+                st.write(f"- **Largeur :** {largeur}")
+            
+            # Section Parking
+            with st.expander("Parkings à proximité"):
+                # Exemple de données fictives pour les parkings
+                parkings = [
+                    {"Nom": "Parking A", "Adresse": "123 Rue Exemple", "Places": 50},
+                    {"Nom": "Parking B", "Adresse": "456 Rue Exemple", "Places": 30},
+                ]
+                parking_df = pd.DataFrame(parkings)
+                st.table(parking_df)
+        elif not suggestion:
+            st.error("Aucune information trouvée pour cette rue. Veuillez vérifier votre saisie.")
     else:
-        st.write("Please agree to the terms and conditions to proceed.")
+        st.error("Veuillez entrer un nom de rue pour lancer la recherche.")
 
-    # Section for displaying results
-    st.subheader("Results")
-    if st.button("Show Results"):
-        st.write("Text:", user_text)
-        st.write("Number:", user_number)
-        st.write("Selected Option:", selected_option)
-        st.write("Slider Value:", slider_value)
-        st.write("Agreement:", "Agreed" if agree else "Not Agreed")
-
-
-if __name__ == "__main__":
-    main()
+# Afficher la suggestion et permettre une recherche
+if st.session_state.suggestion:
+    if st.button(f"Rechercher la suggestion '{st.session_state.suggestion}'"):
+        # Recherche avec la suggestion sauvegardée
+        historique, orig, typevoie, arrdt, quartier, longueur, largeur, _ = get_informations(st.session_state.suggestion)
+        if historique and orig:
+            st.success(f"Informations sur {st.session_state.suggestion} :")
+            
+            # Section Caractéristiques
+            with st.expander("Voir les caractéristiques"):
+                st.write(f"- **Nom historique :** {historique}")
+                st.write(f"- **Nom original :** {orig}")
+                st.write(f"- **Type de voie :** {typevoie}")
+                st.write(f"- **Arrondissement :** {arrdt}")
+                st.write(f"- **Quartier :** {quartier}")
+                st.write(f"- **Longueur :** {longueur}")
+                st.write(f"- **Largeur :** {largeur}")
+            
+            # Section Parking
+            with st.expander("Parkings à proximité"):
+                # Exemple de données fictives pour les parkings
+                parkings = [
+                    {"Nom": "Parking C", "Adresse": "789 Rue Exemple", "Places": 40},
+                    {"Nom": "Parking D", "Adresse": "321 Rue Exemple", "Places": 20},
+                ]
+                parking_df = pd.DataFrame(parkings)
+                st.table(parking_df)
+        else:
+            st.error(f"Aucune information trouvée pour '{st.session_state.suggestion}'.")
