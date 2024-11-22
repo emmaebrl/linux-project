@@ -1,29 +1,60 @@
-# Script Python pour retourner des informations à l'utilisateur
 import pandas as pd
 import sys
 from difflib import get_close_matches
+import streamlit as st
+import folium
+from streamlit_folium import folium_static
 
 
 DATA_PATH = "data/street_data_staged.csv"
-data = pd.read_csv(DATA_PATH)
+DATA_PATH_PARKING = "data/parking_data_staged.csv"
 
-def get_informations(street):
+data = pd.read_csv(DATA_PATH)
+data_parking = pd.read_csv(DATA_PATH_PARKING)
+
+def get_street_data(street):
     """Retourne des informations sur une rue, avec suggestions si nécessaire."""
     research = street.strip().upper()
     if research not in data["typo"].values:
         suggestions = get_close_matches(research, data["typo"].unique(), n=1, cutoff=0.7)
         if suggestions:
-            return None, None, None, None, None, None, None, suggestions[0] 
+            return None, suggestions[0] 
         else:
-            return None, None, None, None, None, None, None, None
+            return None, None
     data.fillna("Information non disponible", inplace=True)
     filtered_data = data[data["typo"] == research]
-    historique = filtered_data['historique'].values[0]
-    orig = filtered_data['orig'].values[0]
-    typevoie = filtered_data['typvoie'].values[0]
-    arrdt = filtered_data['arrdt'].values[0]
-    quartier = filtered_data['quartier'].values[0]
-    longueur = filtered_data['longueur'].values[0]
-    largeur = filtered_data['largeur'].values[0]
+    return filtered_data, None
 
-    return historique, orig, typevoie, arrdt, quartier, longueur, largeur, None
+def afficher_infos_voie(data):
+    st.write(f"- **Nom historique :** {data['historique'].values[0]}")
+    st.write(f"- **Nom original :** {data['orig'].values[0]}")
+    st.write(f"- **Type de voie :** {data['typvoie'].values[0]}")
+    st.write(f"- **Arrondissement :** {data['arrdt'].values[0]}")
+    st.write(f"- **Quartier :** {data['quartier'].values[0]}")
+    st.write(f"- **Longueur :** {data['longueur'].values[0]}")
+    st.write(f"- **Largeur :** {data['largeur'].values[0]}")
+
+def get_parking_data(street):
+    """Retourne les parkings à proximité d'une rue."""
+    research = street.strip().upper()
+    parking_data = data_parking[data_parking['adresse'].str.contains(research, case=False, na=False)]
+    return parking_data
+
+def afficher_infos_parking(parking_data):
+    localisation = [parking_data.iloc[0]['Ylat'], parking_data.iloc[0]['Xlong']]
+    m = folium.Map(location=localisation, zoom_start=15)
+    
+    for _, row in parking_data.iterrows():
+        # Information affichée dans la pop-up en HTML
+        popup_content = f"""
+            <b>Tarif 1h:</b> {row['tarif_1h']} €<br>
+            <b>Hauteur max:</b> {row['hauteur_max']} cm
+            """
+        # Forme du Marker
+        folium.Marker(
+            location=[row['Ylat'], row['Xlong']],
+            popup=folium.Popup(popup_content),
+            tooltip=row['adresse']
+        ).add_to(m)
+    
+    folium_static(m)
