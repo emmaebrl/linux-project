@@ -38,7 +38,7 @@ if st.button("Rechercher"):
 if st.session_state.suggestion:
     if st.button(f"Rechercher la suggestion '{st.session_state.suggestion}'"):
         street_data, suggestion = get_street_data(st.session_state.suggestion)
-        parking_data = get_parking_data(user_input)
+        parking_data = get_parking_data(st.session_state.suggestion)
         if street_data is not None:
             st.success(f"Informations sur {st.session_state.suggestion} :")
             tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])

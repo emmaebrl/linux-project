@@ -21,7 +21,7 @@ def get_street_data(street):
             return None, suggestions[0] 
         else:
             return None, None
-    data.fillna("Information non disponible", inplace=True)
+    data.astype('string').fillna("Information non disponible", inplace=True)
     filtered_data = data[data["typo"] == research]
     return filtered_data, None
 
@@ -36,8 +36,7 @@ def afficher_infos_voie(data):
 
 def get_parking_data(street):
     """Retourne les parkings à proximité d'une rue."""
-    research = street.strip().upper()
-    parking_data = data_parking[data_parking['adresse'].str.contains(research, case=False, na=False)]
+    parking_data = data_parking[data_parking['adresse'].str.contains(street, case=False, na=False)]
     return parking_data
 
 def afficher_infos_parking(parking_data):
