@@ -1,4 +1,5 @@
 import pandas as pd
+import sys
 from difflib import get_close_matches
 import streamlit as st
 import folium
@@ -13,9 +14,9 @@ data_parking = pd.read_csv(DATA_PATH_PARKING)
 
 def get_street_data(street):
     """Retourne des informations sur une rue, avec suggestions si nécessaire."""
-    research = normalize_string(street)
-    if research not in data["typo_normalize"].values:
-        suggestions = get_close_matches(research, data["typo_normalize"].unique(), n=3, cutoff=0.7)
+    research = street.strip().upper()
+    if research not in data["typo"].values:
+        suggestions = get_close_matches(research, data["typo"].unique(), n=1, cutoff=0.7)
         if suggestions:
             return None, suggestions[0] 
         else:
