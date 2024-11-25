@@ -19,9 +19,4 @@ column_renaming = {
     "adresse_normalized": "Adresse Normalisée",
     "typo_match": "Correspondance Typo",
     "typo_normalized": "Typo Normalisée",
-    "orig": "Origine",
-    "historique": "Historique", 
-    "typvoie": "Type de Voie",
-    "longueur": "Longueur",
-    "largeur": "Largeur"
 }

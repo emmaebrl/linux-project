@@ -4,8 +4,6 @@ from difflib import get_close_matches
 import codecs
 from utils import column_renaming
 
-
-# Activer l'UTF-8 pour l'affichage
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 
 # Récupérer la recherche de l'utilisateur
@@ -75,7 +73,6 @@ typo_list = filtered_street_data['typo_normalized'].tolist()
 parking_data_staged["typo_match"] = parking_data_staged["adresse_normalized"].apply(lambda x: find_match(x, typo_list))
 
 filtered_parking_data = parking_data_staged[parking_data_staged["typo_match"].notna()].copy()
-
 filtered_parking_data.rename(columns=column_renaming, inplace=True)
 
 print(filtered_parking_data.columns)
@@ -111,8 +108,14 @@ if not filtered_parking_data.empty:
 # Afficher les résultats
 print("------------------RESULTATS------------------")
 if not filtered_street_data.empty:
-    print(f"Informations about {research} --> \n Historical name : {filtered_street_data['historique'].values[0]} \n Original name : {filtered_street_data['orig'].values[0]}")
-
+    print(f"Historical name : {filtered_street_data['historique'].iloc[0]}")
+    print(f"Original name : {filtered_street_data['orig'].iloc[0]}")
+    print(f"Arrondissement : {filtered_street_data['arrdt'].iloc[0]}")
+    print(f"Type de Voie : {filtered_street_data['typvoie'].iloc[0]}")
+    print(f"Quartier : {filtered_street_data['quartier'].iloc[0]}")
+    print(f"Longueur : {filtered_street_data['longueur'].iloc[0]}")
+    print(f"Largeur : {filtered_street_data['largeur'].iloc[0]}")
+  
 if not filtered_parking_data.empty:
     print("\nDescription des parkings:")
     for description in filtered_parking_data["Description"]:
