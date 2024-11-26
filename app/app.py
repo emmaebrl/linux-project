@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking
+from core.utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking
+
 
 st.title("Nom de l'application")
 
