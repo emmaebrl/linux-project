@@ -1,9 +1,18 @@
+
 FROM python:3.10-slim
 WORKDIR /app
+EXPOSE 8501
+
+# Définir les variables d'environnement pour Streamlit
+ENV STREAMLIT_SERVER_PORT=8501
+ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 COPY . .
-RUN apt-get update && apt-get install -y dos2unix
-RUN find . -type f \( -name ".sh" -o -name ".txt" -o -name ".csv" -o -name ".py" -o -name "Dockerfile" -o -name "requirements.txt" \) -exec dos2unix {} +
-RUN chmod +x bin/install.sh bin/launch.sh bin/run.sh
-RUN bash bin/install.sh
-CMD ["bash", "bin/launch.sh"]
-ENTRYPOINT ["bash", "bin/launch.sh"]
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    dos2unix && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN find . -type f \( -name "*.sh" -o -name "*.py" \) -exec dos2unix {} +
+RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN chmod +x bin/menu.sh bin/launch.sh bin/launch_app.sh
+ENTRYPOINT ["bash", "bin/menu.sh"]
+
