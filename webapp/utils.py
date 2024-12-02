@@ -38,12 +38,15 @@ def get_parking_data(street, arrondissement=None):
     """Retourne les parkings à proximité d'une rue, éventuellement filtrés par arrondissement."""
     parking_data = pd.DataFrame()  # Initialize as empty DataFrame
     if arrondissement:
-        if len(arrondissement) == 1:
-            arrondissement = "7500" + arrondissement
-        elif len(arrondissement) == 2:
-            arrondissement = "750" + arrondissement
-        print(arrondissement)
-        parking_data = data_parking[data_parking['adresse'].str.contains(arrondissement, case=False, na=False)]
+        arrondissements = arrondissement.split(",")
+        arrondissements_formatted = []
+        for arrondissement in arrondissements:
+            if len(arrondissement) == 1:
+                arrondissement = "7500" + arrondissement
+            elif len(arrondissement) == 2:
+                arrondissement = "750" + arrondissement
+            arrondissements_formatted.append(arrondissement)
+        parking_data = data_parking[data_parking['adresse'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
     else:
         parking_data = data_parking[data_parking['adresse'].str.contains(street, case=False, na=False)]
     parking_data = parking_data.dropna(subset=['Ylat', 'Xlong'])

@@ -11,13 +11,10 @@ if "current_input" not in st.session_state:
     st.session_state.current_input = None
 
 user_input = st.text_input("Entrez une rue dans la barre de recherche :")
-option = st.selectbox("Afficher les cartes pour l'arrondissement entier", ["Oui", "Non"])
 
 if st.button("Rechercher"):
     if user_input.strip():
-        # Initialiser parking_data
         parking_data = pd.DataFrame()
-
         street_data, suggestion = get_street_data(user_input)
         st.session_state.current_input = user_input
         st.session_state.suggestion = suggestion
@@ -27,11 +24,9 @@ if st.button("Rechercher"):
 
         if street_data is not None:
             st.success(f"Informations sur {user_input} :")
-            if option == "Oui":
-                arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
-                parking_data = get_parking_data(user_input, arrondissement)
-            else:
-                parking_data = get_parking_data(user_input)
+            
+            arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
+            parking_data = get_parking_data(user_input, arrondissement)
 
             tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])
             with tab1:
@@ -55,12 +50,9 @@ if st.session_state.suggestion:
 
         street_data, suggestion = get_street_data(st.session_state.suggestion)
         if street_data is not None:
-            if option == "Oui":
-                arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
-                parking_data = get_parking_data(suggestion, arrondissement)
-            else:
-                parking_data = get_parking_data(st.session_state.suggestion)
-
+   
+            arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
+            parking_data = get_parking_data(suggestion, arrondissement)
             st.success(f"Informations sur {st.session_state.suggestion} :")
             tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])
             with tab1:
