@@ -51,8 +51,11 @@ museum_data = pd.DataFrame({
     "Xlong": [feature["geometry"]["coordinates"][0] for feature in museum_data["features"]],
     "Ylat": [feature["geometry"]["coordinates"][1] for feature in museum_data["features"]],
     "name": [feature["properties"]["l_ep_min"] for feature in museum_data["features"]],
-    "adresse": [feature["properties"]["adresse"] for feature in museum_data["features"]]
+    "adresse": [feature["properties"]["adresse"] for feature in museum_data["features"]],
+    "c_postal": [feature["properties"]["c_postal"] for feature in museum_data["features"]],
 })
 museum_data["adresse_normalized"] = museum_data["adresse"].apply(normalize_string)
+museum_data["c_postal"] = museum_data["c_postal"].astype(str)
+museum_data_filtered = museum_data[museum_data["c_postal"].str.startswith("75")].copy()
 museum_data.to_csv(museum_data_staged_path, index=False)
 print("Integration done!")

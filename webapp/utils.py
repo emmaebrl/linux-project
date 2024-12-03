@@ -92,7 +92,8 @@ def get_museum_data(street, arrondissement=None):
             elif len(arrondissement) == 2:
                 arrondissement = "750" + arrondissement
             arrondissements_formatted.append(arrondissement)
-        museum_data = data_museum[data_museum['adresse'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
+        data_museum['c_postal'] = data_museum['c_postal'].astype(str)
+        museum_data = data_museum[data_museum['c_postal'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
     else:
         museum_data = data_museum[data_museum['adresse'].str.contains(street, case=False, na=False)]
     museum_data = museum_data.dropna(subset=['Ylat', 'Xlong'])
@@ -112,7 +113,7 @@ def afficher_infos_museum(museum_data):
         folium.Marker(
             location=[row['Ylat'], row['Xlong']],
             popup=folium.Popup(popup_content),
-            tooltip=row['nom_du_musee']
+            tooltip=row['name']
         ).add_to(m)
     
     folium_static(m)
