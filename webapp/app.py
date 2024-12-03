@@ -26,6 +26,7 @@ st.markdown("""
         border-radius: 10px;
         border: none;
         padding: 10px 20px;
+        cursor: pointer;
     }
     .stButton>button:hover {
         background-color: #45a049;
@@ -54,11 +55,12 @@ if "suggestion" not in st.session_state:
 if "current_input" not in st.session_state:
     st.session_state.current_input = None
 
-# Champ de recherche
-col1, col2 = st.columns([3, 1])
+# Création de colonnes pour aligner la barre de recherche et le bouton
+col1, col2 = st.columns([4, 1])  # Ajustez les proportions des colonnes
 with col1:
     user_input = st.text_input("🔍 Entrez une rue :", placeholder="Exemple : Champs-Élysées")
 with col2:
+    st.markdown("<br>", unsafe_allow_html=True)  # Ajouter un espace pour aligner verticalement
     rechercher = st.button("Rechercher")
 
 # Gestion de la recherche

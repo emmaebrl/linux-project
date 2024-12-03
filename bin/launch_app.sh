@@ -8,7 +8,7 @@ bash run.sh\
 && echo "Data downloaded" \
 && echo "Integrating data" \
 && cd ../data_integrator\
-&& bash run.sh \ # sh ../data_integrator/run.sh
+&& bash run.sh \
 && echo "Data integrated" \
 && cd ..\
 && echo "Running the app" \
