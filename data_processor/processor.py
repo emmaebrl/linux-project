@@ -16,6 +16,7 @@ print(f"Extracting information about {research}")
 
 # Chemins des fichiers
 street_data_staged_path = "../data/street_data_staged.csv"
+
 parking_data_staged_path = "../data/parking_data_staged.csv"
 museum_data_staged_path = "../data/museum_data_staged.csv"
 

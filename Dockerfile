@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 # from python image
 ENV DEBIAN_FRONTEND=noninteractive
 RUN mkdir -p /home/mosef
 RUN apt update && apt-get install -y \
