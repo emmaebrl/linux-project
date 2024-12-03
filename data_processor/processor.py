@@ -18,11 +18,13 @@ print(f"Extracting information about {research}")
 street_data_staged_path = "../data/street_data_staged.csv"
 
 parking_data_staged_path = "../data/parking_data_staged.csv"
+museum_data_staged_path = "../data/museum_data_staged.csv"
 
 # Charger les données
 try:
     street_data_staged = pd.read_csv(street_data_staged_path)
     parking_data_staged = pd.read_csv(parking_data_staged_path, sep=",")
+    museum_data_staged = pd.read_csv(museum_data_staged_path)
 except FileNotFoundError as e:
     print(f"Error: {e}")
     sys.exit(1)
@@ -71,12 +73,8 @@ def find_match(adresse, typo_list):
 # Trouver les correspondances pour les adresses normalisées
 typo_list = filtered_street_data['typo_normalized'].tolist()
 parking_data_staged["typo_match"] = parking_data_staged["adresse_normalized"].apply(lambda x: find_match(x, typo_list))
-
 filtered_parking_data = parking_data_staged[parking_data_staged["typo_match"].notna()].copy()
 filtered_parking_data.rename(columns=column_renaming, inplace=True)
-
-print(filtered_parking_data.columns)
-
 
 # Conversion des colonnes numériques
 numeric_columns = [
@@ -105,6 +103,10 @@ if not filtered_parking_data.empty:
         "Gratuit : " + filtered_parking_data["Gratuit"].astype(str) + "\n"
 )
 
+print(typo_list)
+museum_data_staged["typo_match"] = museum_data_staged["adresse_normalized"].apply(lambda x: find_match(x, typo_list))
+filtered_museum_data = museum_data_staged[museum_data_staged["typo_match"].notna()].copy()
+
 # Afficher les résultats
 print("------------------RESULTATS------------------")
 if not filtered_street_data.empty:
@@ -122,3 +124,13 @@ if not filtered_parking_data.empty:
         print(description)
 else:
     print("No parking data found for the given query.")
+
+if not filtered_museum_data.empty:
+    print("\nMusées à proximité:")
+    for _, row in filtered_museum_data.iterrows():
+        print(f"Nom : {row['name']}")
+        print(f"Adresse : {row['adresse']}")
+        print("\n")
+else:
+    print("No museum data found for the given query.")
+    

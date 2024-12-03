@@ -1,6 +1,5 @@
 import pandas as pd
-# import json
-# import sys
+import json
 import re
 from unidecode import unidecode
 
@@ -10,6 +9,10 @@ def normalize_string(s):
     s = unidecode(s) 
     s = re.sub(r'[^\w]', '', s) 
     s = s.lower()
+    s = s.replace("de", "") 
+    s = s.replace("av", "avenue")
+    s = s.replace("bd", "boulevard")
+    s = s.replace("pl", "place")
     return s
 
 
@@ -22,7 +25,8 @@ parking_data_raw_path = "../../data/parking_data_raw.csv"
 parking_data_staged_path = "../../data/parking_data_staged.csv"
 toilets_data_raw_path = "../../data/toilets_data_raw.csv"
 toilets_data_staged_path = "../../data/toilets_data_staged.csv"
-
+museum_data_raw_path = "../../data/museum_data_raw.json"
+museum_data_staged_path = "../../data/museum_data_staged.csv"
 
 # Intégration des données sur les rues
 print("Integrating Streets raw data from", street_data_raw_path)
@@ -52,4 +56,18 @@ toilets_data.to_csv(toilets_data_staged_path, index = False)
 print(f"Filtered toilets data savec to {toilets_data_staged_path}")
 
 
+# Intégration des données sur les musées
+print("Integrating Museum raw data from", museum_data_raw_path)
+museum_data = json.load(open(museum_data_raw_path))
+museum_data = pd.DataFrame({
+    "Xlong": [feature["geometry"]["coordinates"][0] for feature in museum_data["features"]],
+    "Ylat": [feature["geometry"]["coordinates"][1] for feature in museum_data["features"]],
+    "name": [feature["properties"]["l_ep_min"] for feature in museum_data["features"]],
+    "adresse": [feature["properties"]["adresse"] for feature in museum_data["features"]],
+    "c_postal": [feature["properties"]["c_postal"] for feature in museum_data["features"]],
+})
+museum_data["adresse_normalized"] = museum_data["adresse"].apply(normalize_string)
+museum_data["c_postal"] = museum_data["c_postal"].astype(str)
+museum_data_filtered = museum_data[museum_data["c_postal"].str.startswith("75")].copy()
+museum_data.to_csv(museum_data_staged_path, index=False)
 print("Integration done!")
