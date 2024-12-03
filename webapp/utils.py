@@ -34,25 +34,45 @@ def afficher_infos_voie(data):
     st.write(f"- **Longueur :** {data['longueur'].values[0]}")
     st.write(f"- **Largeur :** {data['largeur'].values[0]}")
 
-def get_parking_data(street):
-    """Retourne les parkings à proximité d'une rue."""
-    parking_data = data_parking[data_parking['adresse'].str.contains(street, case=False, na=False)]
+def get_parking_data(street, arrondissement=None):
+    """Retourne les parkings à proximité d'une rue, éventuellement filtrés par arrondissement."""
+    parking_data = pd.DataFrame()  # Initialize as empty DataFrame
+    if arrondissement:
+        arrondissements = arrondissement.split(",")
+        arrondissements_formatted = []
+        for arrondissement in arrondissements:
+            if len(arrondissement) == 1:
+                arrondissement = "7500" + arrondissement
+            elif len(arrondissement) == 2:
+                arrondissement = "750" + arrondissement
+            arrondissements_formatted.append(arrondissement)
+        parking_data = data_parking[data_parking['adresse'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
+    else:
+        parking_data = data_parking[data_parking['adresse'].str.contains(street, case=False, na=False)]
+    parking_data = parking_data.dropna(subset=['Ylat', 'Xlong'])
     return parking_data
 
+
 def afficher_infos_parking(parking_data):
+    if parking_data.empty:
+        st.write("Aucun parking trouvé à proximité.")
+        return
+    
     localisation = [parking_data.iloc[0]['Ylat'], parking_data.iloc[0]['Xlong']]
     m = folium.Map(location=localisation, zoom_start=15)
     
     for _, row in parking_data.iterrows():
-        # Information affichée dans la pop-up en HTML
+        if pd.isna(row['Ylat']) or pd.isna(row['Xlong']):
+            continue 
+        
         popup_content = f"""
+            <b>Adresse:</b> {row['adresse']}<br>
             <b>Tarif 1h:</b> {row['tarif_1h']} €<br>
             <b>Hauteur max:</b> {row['hauteur_max']} cm
-            """
-        # Forme du Marker
+        """
         folium.Marker(
             location=[row['Ylat'], row['Xlong']],
-            popup=folium.Popup(popup_content),
+            popup=folium.Popup(popup_content, max_width=300),
             tooltip=row['adresse']
         ).add_to(m)
     
