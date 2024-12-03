@@ -14,6 +14,12 @@ bash run.sh \
 && cd .. \
 && echo "Running the app"
 streamlit run webapp/app.py --server.port=5002 &
+sleep 2
+
+# Afficher l'adresse IP publique ou locale
+IP=$(hostname -I | awk '{print $1}')
+echo "Votre application est accessible à : http://$IP:5002"
+
+tail -f /dev/null
 #sleep 2
 #echo "Votre application est accessible à : http://localhost:8501"
-tail -f /dev/null
