@@ -47,7 +47,7 @@ if st.session_state.suggestion:
         parking_data = get_parking_data(st.session_state.suggestion)
         if street_data is not None:
             st.success(f"Informations sur {st.session_state.suggestion} :")
-            tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])
+            tab1, tab2, tab3 = st.tabs(["Caractéristiques", "Parkings à proximité", "Musées à proximité"])
             with tab1:
                 afficher_infos_voie(street_data)
             with tab2:
