@@ -13,14 +13,7 @@ bash run.sh \
 && echo "Data integrated" \
 && cd .. \
 && echo "Running the app"
-
-streamlit run webapp/app.py --server.address=0.0.0.0 --server.port=8501 &
-
-# Attendre un moment pour s'assurer que Streamlit démarre
-sleep 2
-
-# Afficher l'URL d'accès
-echo "Votre application est accessible à : http://localhost:8501"
-
-# Garder le script actif pour éviter que le conteneur se termine
+streamlit run webapp/app.py --server.port=5002 &
+#sleep 2
+#echo "Votre application est accessible à : http://localhost:8501"
 tail -f /dev/null
