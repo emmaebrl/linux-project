@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking
+from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking, get_toilets_data, afficher_infos_toilets
 
 # Ajout des styles personnalisés
 st.markdown("""
@@ -78,9 +78,10 @@ if rechercher:
             st.success(f"✅ Résultats pour **{user_input}** :")
             arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
             parking_data = get_parking_data(user_input, arrondissement)
+            toilets_data = get_toilets_data(user_input, arrondissement)
 
             # Affichage des résultats dans des onglets
-            tab1, tab2 = st.tabs(["📄 Détails sur la rue", "🅿️ Parkings à proximité"])
+            tab1, tab2, tab3 = st.tabs(["📄 Détails sur la rue", "🅿️ Parkings à proximité", "🚽 Toilettes à proximité"])
             with tab1:
                 afficher_infos_voie(street_data)
             with tab2:
@@ -88,6 +89,11 @@ if rechercher:
                     afficher_infos_parking(parking_data)
                 else:
                     st.info("🛑 Aucun parking trouvé à proximité.")
+            with tab3:
+                if not toilets_data.empty:
+                    afficher_infos_toilets(toilets_data)
+                else :
+                    st.info("🛑 Aucune toilette trouvée à proximité")
         else:
             st.error(f"❌ Aucune information trouvée pour **{user_input}**.")
     else:
@@ -102,16 +108,22 @@ if st.session_state.suggestion:
         if street_data is not None:
             arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
             parking_data = get_parking_data(st.session_state.suggestion, arrondissement)
+            toilets_data = get_toilets_data(st.session_state.suggestion, arrondissement)
 
             st.success(f"✅ Résultats pour **{st.session_state.suggestion}** :")
-            tab1, tab2 = st.tabs(["📄 Détails sur la rue", "🅿️ Parkings à proximité"])
+            tab1, tab2, tab3 = st.tabs(["📄 Détails sur la rue", "🅿️ Parkings à proximité" , "🚽 Toilettes à proximité"])
             with tab1:
                 afficher_infos_voie(street_data)
             with tab2:
                 if not parking_data.empty:
                     afficher_infos_parking(parking_data)
                 else:
-                    st.info("🛑 Aucun parking trouvé à proximité.")
+                    st.info("🛑 Aucun parking trouvé à proximité.")            
+            with tab3:
+                if not toilets_data.empty:
+                    afficher_infos_toilets(toilets_data)
+                else:
+                    st.info("🛑 Aucune toilette trouvée à proximité.")
         else:
             st.error(f"❌ Aucune information trouvée pour **{st.session_state.suggestion}**.")
 

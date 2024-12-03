@@ -20,6 +20,9 @@ street_data_raw_path = "../../data/street_data_raw.csv"
 street_data_staged_path = "../../data/street_data_staged.csv"
 parking_data_raw_path = "../../data/parking_data_raw.csv"
 parking_data_staged_path = "../../data/parking_data_staged.csv"
+toilets_data_raw_path = "../../data/toilets_data_raw.csv"
+toilets_data_staged_path = "../../data/toilets_data_staged.csv"
+
 
 # Intégration des données sur les rues
 print("Integrating Streets raw data from", street_data_raw_path)
@@ -39,6 +42,14 @@ parking_data["adresse_normalized"] = parking_data["adresse"].apply(normalize_str
 parking_data.to_csv(parking_data_staged_path, index=False)
 print(f"Filtered parking data saved to {parking_data_staged_path}")
 
+# Intégration des données sur les parkings
+print("Integrating toilets raw data from" , toilets_data_raw_path)
+toilets_data = pd.read_csv(toilets_data_raw_path, sep = ";")
+toilets_data["adresse_normalized"] = toilets_data['ADRESSE'].apply(normalize_string)
+# Récupération des 2 coordonées situées dans une seule colonne
+toilets_data[['latitude', 'longitude']] = toilets_data['geo_point_2d'].str.split(', ', expand=True).astype(float)
+toilets_data.to_csv(toilets_data_staged_path, index = False)
+print(f"Filtered toilets data savec to {toilets_data_staged_path}")
 
 
 print("Integration done!")

@@ -8,9 +8,11 @@ from streamlit_folium import folium_static
 
 DATA_PATH = "data/street_data_staged.csv"
 DATA_PATH_PARKING = "data/parking_data_staged.csv"
+DATA_PATH_TOILETS = "data/toilets_data_staged.csv"
 
 data = pd.read_csv(DATA_PATH)
 data_parking = pd.read_csv(DATA_PATH_PARKING)
+data_toilets = pd.read_csv(DATA_PATH_TOILETS)
 
 def get_street_data(street):
     """Retourne des informations sur une rue, avec suggestions si nécessaire."""
@@ -74,6 +76,50 @@ def afficher_infos_parking(parking_data):
             location=[row['Ylat'], row['Xlong']],
             popup=folium.Popup(popup_content, max_width=300),
             tooltip=row['adresse']
+        ).add_to(m)
+    
+    folium_static(m)
+
+def get_toilets_data(street, arrondissement=None):
+    """Retourne les toilettes à proximité d'une rue, éventuellement filtrés par arrondissement."""
+    toilets_data = pd.DataFrame()  # Initialize as empty DataFrame
+    if arrondissement:
+        arrondissements = arrondissement.split(",")
+        arrondissements_formatted = []
+        for arrondissement in arrondissements:
+            if len(arrondissement) == 1:
+                arrondissement = "7500" + arrondissement
+            elif len(arrondissement) == 2:
+                arrondissement = "750" + arrondissement
+            arrondissements_formatted.append(arrondissement)
+        data_toilets['ARRONDISSEMENT'] = data_toilets['ARRONDISSEMENT'].astype(str)
+
+        toilets_data = data_toilets[data_toilets['ARRONDISSEMENT'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
+    else:
+        toilets_data = data_toilets[data_toilets['adresse_normalized'].str.contains(street, case=False, na=False)]
+    toilets_data = toilets_data.dropna(subset=['latitude', 'longitude'])
+    return toilets_data
+
+def afficher_infos_toilets(toilets_data):
+    if toilets_data.empty:
+        st.write("Aucune toilette trouvée à proximité.")
+        return
+    
+    localisation = [toilets_data.iloc[0]['latitude'], toilets_data.iloc[0]['longitude']]
+    m = folium.Map(location=localisation, zoom_start=15)
+    
+    for _, row in toilets_data.iterrows():
+        if pd.isna(row['latitude']) or pd.isna(row['longitude']):
+            continue 
+        
+        popup_content = f"""
+            <b>Accès PMR:</b> {row['ACCES_PMR']}<br>
+            <b>Horaire:</b> {row['HORAIRE']}<br>
+        """
+        folium.Marker(
+            location=[row['latitude'], row['longitude']],
+            popup=folium.Popup(popup_content, max_width=300),
+            tooltip=row['ADRESSE']
         ).add_to(m)
     
     folium_static(m)
