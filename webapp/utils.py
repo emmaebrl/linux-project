@@ -10,11 +10,13 @@ DATA_PATH = "data/street_data_staged.csv"
 DATA_PATH_PARKING = "data/parking_data_staged.csv"
 DATA_PATH_TOILETS = "data/toilets_data_staged.csv"
 DATA_PATH_MUSEUM = "data/museum_data_staged.csv"
+DATA_PATH_SPORTS = "data/sports_data_staged.csv"
 
 data = pd.read_csv(DATA_PATH)
 data_parking = pd.read_csv(DATA_PATH_PARKING)
 data_museum = pd.read_csv(DATA_PATH_MUSEUM)
 data_toilets = pd.read_csv(DATA_PATH_TOILETS)
+data_sports = pd.read_csv(DATA_PATH_SPORTS)
 
 
 def get_street_data(street):
@@ -153,6 +155,44 @@ def afficher_infos_museum(museum_data):
     m = folium.Map(location=localisation, zoom_start=15)
     
     for _, row in museum_data.iterrows():
+        # Information affichée dans la pop-up en HTML
+        popup_content = f"""
+            <b>Name:</b> {row['name']}<br>
+            <b>Adresse:</b> {row['adresse']}<br>
+            """
+        # Forme du Marker
+        folium.Marker(
+            location=[row['Ylat'], row['Xlong']],
+            popup=folium.Popup(popup_content),
+            tooltip=row['name']
+        ).add_to(m)
+    
+    folium_static(m)
+
+def get_sports_data(street, arrondissement=None):
+    """Retourne les musées à proximité d'une rue."""
+    sports_data = pd.DataFrame()
+    if arrondissement:
+        arrondissements = arrondissement.split(",")
+        arrondissements_formatted = []
+        for arrondissement in arrondissements:
+            if len(arrondissement) == 1:
+                arrondissement = "7500" + arrondissement
+            elif len(arrondissement) == 2:
+                arrondissement = "750" + arrondissement
+            arrondissements_formatted.append(arrondissement)
+        data_sports['c_postal'] = data_sports['c_postal'].astype(str)
+        sports_data = data_sports[data_sports['c_postal'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
+    else:
+        sports_data = data_sports[data_sports['adresse'].str.contains(street, case=False, na=False)]
+    sports_data = sports_data.dropna(subset=['Ylat', 'Xlong'])
+    return sports_data
+
+def afficher_infos_sports(sports_data):
+    localisation = [sports_data.iloc[0]['Ylat'], sports_data.iloc[0]['Xlong']]
+    m = folium.Map(location=localisation, zoom_start=15)
+    
+    for _, row in sports_data.iterrows():
         # Information affichée dans la pop-up en HTML
         popup_content = f"""
             <b>Name:</b> {row['name']}<br>

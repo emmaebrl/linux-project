@@ -27,6 +27,8 @@ toilets_data_raw_path = "../../data/toilets_data_raw.csv"
 toilets_data_staged_path = "../../data/toilets_data_staged.csv"
 museum_data_raw_path = "../../data/museum_data_raw.json"
 museum_data_staged_path = "../../data/museum_data_staged.csv"
+sports_data_raw_path = "../../data/sports_data_raw.json"
+sports_data_staged_path = "../../data/sports_data_staged.csv"
 
 # Intégration des données sur les rues
 print("Integrating Streets raw data from", street_data_raw_path)
@@ -70,4 +72,22 @@ museum_data["adresse_normalized"] = museum_data["adresse"].apply(normalize_strin
 museum_data["c_postal"] = museum_data["c_postal"].astype(str)
 museum_data_filtered = museum_data[museum_data["c_postal"].str.startswith("75")].copy()
 museum_data.to_csv(museum_data_staged_path, index=False)
+
+# Intégration des données sur les complexes sportifs
+print("Integrating Sports raw data from", sports_data_raw_path)
+sports_data = json.load(open(sports_data_raw_path))
+sports_data_df = pd.DataFrame({
+    "Xlong": [feature["geometry"]["coordinates"][0] for feature in sports_data["features"]],
+    "Ylat": [feature["geometry"]["coordinates"][1] for feature in sports_data["features"]],
+    "name": [feature["properties"]["l_ep_maj"] for feature in sports_data["features"]],
+    "adresse": [f"{feature['properties'].get('n_voie', '')} {feature['properties'].get('c_suf1', '')} {feature['properties'].get('c_suf2', '')} {feature['properties'].get('c_suf3', '')} {feature['properties'].get('c_desi', '')} {feature['properties'].get('c_liaison', '')} {feature['properties'].get('l_voie', '')}" for feature in sports_data["features"]],
+    "annee_creation": [feature["properties"]["d_annee_cr"] for feature in sports_data["features"]],
+    "public": [feature["properties"]["b_public"] for feature in sports_data["features"]]
+})
+
+# Normaliser l'adresse
+sports_data_df["adresse_normalized"] = sports_data_df["adresse"].apply(normalize_string)
+sports_data_df.to_csv(sports_data_staged_path, index=False)
+
+
 print("Integration done!")
