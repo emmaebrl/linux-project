@@ -1,8 +1,53 @@
 import streamlit as st
 import pandas as pd
-from utils import get_informations
+from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking, get_toilets_data, afficher_infos_toilets , get_museum_data, afficher_infos_museum
 
-st.title("Recherche d'informations sur une rue")
+# Ajout des styles personnalisés
+st.markdown("""
+    <style>
+    body {
+        background-color: #f4f4f9;
+    }
+    .main-title {
+        font-size: 40px;
+        color: #4CAF50;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+    }
+    .sub-title {
+        font-size: 24px;
+        color: #2196F3;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .stButton>button:hover {
+        background-color: #45a049;
+        color: white;
+    }
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Titre principal et sous-titre
+st.markdown('<h1 class="main-title">🌍 Recherche de rues et parkings 🚗</h1>', unsafe_allow_html=True)
+st.markdown('<h2 class="sub-title">Trouvez des informations rapidement et efficacement</h2>', unsafe_allow_html=True)
 
 # Initialisation des variables de session
 if "suggestion" not in st.session_state:
@@ -10,72 +55,94 @@ if "suggestion" not in st.session_state:
 if "current_input" not in st.session_state:
     st.session_state.current_input = None
 
-# Saisie de l'utilisateur
-user_input = st.text_input("Entrez une rue dans la barre de recherche :")
+# Création de colonnes pour aligner la barre de recherche et le bouton
+col1, col2 = st.columns([4, 1])  # Ajustez les proportions des colonnes
+with col1:
+    user_input = st.text_input("🔍 Entrez une rue :", placeholder="Exemple : Champs-Élysées")
+with col2:
+    st.markdown("<br>", unsafe_allow_html=True)  # Ajouter un espace pour aligner verticalement
+    rechercher = st.button("Rechercher")
 
-# Bouton de recherche
-if st.button("Rechercher"):
-    if user_input.strip():  # Vérifie que l'utilisateur a saisi un texte
-        historique, orig, typevoie, arrdt, quartier, longueur, largeur, suggestion = get_informations(user_input)
-        st.session_state.current_input = user_input  # Sauvegarde de l'entrée actuelle
-        st.session_state.suggestion = suggestion    # Sauvegarde de la suggestion
+# Gestion de la recherche
+if rechercher:
+    if user_input.strip():
+        parking_data = pd.DataFrame()
+        street_data, suggestion = get_street_data(user_input)
+        st.session_state.current_input = user_input
+        st.session_state.suggestion = suggestion
 
         if suggestion:
-            st.warning(f"Did you mean: **{suggestion}**?")
+            st.warning(f"💡 **Suggestion :** Essayez avec **{suggestion}**.")
 
-        if historique and orig:
-            st.success(f"Informations sur {user_input} :")
-            
-            # Section Caractéristiques
-            with st.expander("Voir les caractéristiques"):
-                st.write(f"- **Nom historique :** {historique}")
-                st.write(f"- **Nom original :** {orig}")
-                st.write(f"- **Type de voie :** {typevoie}")
-                st.write(f"- **Arrondissement :** {arrdt}")
-                st.write(f"- **Quartier :** {quartier}")
-                st.write(f"- **Longueur :** {longueur}")
-                st.write(f"- **Largeur :** {largeur}")
-            
-            # Section Parking
-            with st.expander("Parkings à proximité"):
-                # Exemple de données fictives pour les parkings
-                parkings = [
-                    {"Nom": "Parking A", "Adresse": "123 Rue Exemple", "Places": 50},
-                    {"Nom": "Parking B", "Adresse": "456 Rue Exemple", "Places": 30},
-                ]
-                parking_df = pd.DataFrame(parkings)
-                st.table(parking_df)
-        elif not suggestion:
-            st.error("Aucune information trouvée pour cette rue. Veuillez vérifier votre saisie.")
-    else:
-        st.error("Veuillez entrer un nom de rue pour lancer la recherche.")
+        if street_data is not None:            
+            st.success(f"✅ Résultats pour **{user_input}** :")
+            arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
+            parking_data = get_parking_data(user_input, arrondissement)
+            toilets_data = get_toilets_data(user_input, arrondissement)
+            museum_data = get_museum_data(user_input, arrondissement)
 
-# Afficher la suggestion et permettre une recherche
-if st.session_state.suggestion:
-    if st.button(f"Rechercher la suggestion '{st.session_state.suggestion}'"):
-        # Recherche avec la suggestion sauvegardée
-        historique, orig, typevoie, arrdt, quartier, longueur, largeur, _ = get_informations(st.session_state.suggestion)
-        if historique and orig:
-            st.success(f"Informations sur {st.session_state.suggestion} :")
-            
-            # Section Caractéristiques
-            with st.expander("Voir les caractéristiques"):
-                st.write(f"- **Nom historique :** {historique}")
-                st.write(f"- **Nom original :** {orig}")
-                st.write(f"- **Type de voie :** {typevoie}")
-                st.write(f"- **Arrondissement :** {arrdt}")
-                st.write(f"- **Quartier :** {quartier}")
-                st.write(f"- **Longueur :** {longueur}")
-                st.write(f"- **Largeur :** {largeur}")
-            
-            # Section Parking
-            with st.expander("Parkings à proximité"):
-                # Exemple de données fictives pour les parkings
-                parkings = [
-                    {"Nom": "Parking C", "Adresse": "789 Rue Exemple", "Places": 40},
-                    {"Nom": "Parking D", "Adresse": "321 Rue Exemple", "Places": 20},
-                ]
-                parking_df = pd.DataFrame(parkings)
-                st.table(parking_df)
+
+            # Affichage des résultats dans des onglets
+            tab1, tab2, tab3, tab4 = st.tabs(["📄 Détails sur la rue", "🅿️ Parkings à proximité", "🚽 Toilettes à proximité" , "📖 Musées à proximité"])
+
+            # Affichage des résultats dans des onglets
+            with tab1:
+                afficher_infos_voie(street_data)
+            with tab2:
+                if not parking_data.empty:
+                    afficher_infos_parking(parking_data)
+                else:
+                    st.info("🛑 Aucun parking trouvé à proximité.")
+            with tab3:
+                if not toilets_data.empty:
+                    afficher_infos_toilets(toilets_data)
+                else :
+                    st.info("🛑 Aucune toilette trouvée à proximité")
+            with tab4 : 
+                if not museum_data.empty:
+                    afficher_infos_museum(museum_data)
+                else:
+                    st.info("🛑 Aucun musée trouvé à proximité.")
+                    
         else:
-            st.error(f"Aucune information trouvée pour '{st.session_state.suggestion}'.")
+            st.error(f"❌ Aucune information trouvée pour **{user_input}**.")
+    else:
+        st.error("❌ Veuillez entrer un nom de rue pour lancer la recherche.")
+
+# Gestion des suggestions
+if st.session_state.suggestion:
+    if st.button(f"🔄 Rechercher la suggestion '{st.session_state.suggestion}'"):
+        parking_data = pd.DataFrame()
+        street_data, suggestion = get_street_data(st.session_state.suggestion)
+
+        if street_data is not None:
+            arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
+            museum_data = get_museum_data(st.session_state.suggestion, arrondissement)
+            parking_data = get_parking_data(st.session_state.suggestion, arrondissement)
+            toilets_data = get_toilets_data(st.session_state.suggestion, arrondissement)
+
+            st.success(f"✅ Résultats pour **{st.session_state.suggestion}** :")
+            tab1, tab2, tab3, tab4 = st.tabs(["📄 Détails sur la rue", "🅿️ Parkings à proximité" , "🚽 Toilettes à proximité" , "📖 Musées à proximité"])
+            with tab1:
+                afficher_infos_voie(street_data)
+            with tab2:
+                if not parking_data.empty:
+                    afficher_infos_parking(parking_data)
+                else:
+                    st.info("🛑 Aucun parking trouvé à proximité.")            
+            with tab3:
+                if not toilets_data.empty:
+                    afficher_infos_toilets(toilets_data)
+                else:
+                    st.info("🛑 Aucune toilette trouvée à proximité.")
+            with tab4:
+                if not museum_data.empty:
+                    afficher_infos_museum(museum_data)
+                else:
+                    st.info("🛑 Aucun musée trouvé à proximité.")
+                    
+        else:
+            st.error(f"❌ Aucune information trouvée pour **{st.session_state.suggestion}**.")
+
+# Pied de page
+st.markdown('<div class="footer"><p>Créé avec ❤️ par Sharon, Emma, Alexis et Lina - 2024</p></div>', unsafe_allow_html=True)

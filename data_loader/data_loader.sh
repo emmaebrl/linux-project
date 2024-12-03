@@ -7,6 +7,8 @@ if [ ${overwrite} == "true" ]; then
   update=true
 fi
 
+## RUES
+
 if [ -f "../data/street_data_raw.csv" ] && [ "$update" = false ]; then
   echo "Streets already exists. Skipping download because overwrite is set to false."
 else
@@ -18,6 +20,8 @@ fi
 
 echo "Data are saved and ready in data/street_data_raw.csv"
 
+## PARKINGS
+
 if [ -f "../data/parking_data_raw.csv" ] && [ "$update" = false ]; then
   echo "Parking data already exists. Skipping download because overwrite is set to false."
 else
@@ -26,3 +30,23 @@ else
 fi
 
 echo "Data are saved and ready in data/parking_data_raw.csv"
+
+
+## TOILETTES
+
+if [ -f "../data/toilets_data_raw.csv" ] && [ "$update" = false ]; then
+  echo "Toilets data already exists. Skipping download because overwrite is set to false."
+else
+  echo "Downloading data from data.gouv.fr"
+ curl 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/sanisettesparis/exports/csv?use_labels=true' -o ../data/toilets_data_raw.csv
+fi
+
+# MUSEES
+
+echo "Data are saved and ready in data/toilets_data_raw.csv"
+if [ -f "../data/museum_data_raw.json" ] && [ "$update" = false ]; then
+  echo "Museum data already exists. Skipping download because overwrite is set to false."
+else
+  echo "Downloading data from opendata"
+ curl 'https://carto2.apur.org/apur/rest/services/OPENDATA/LIEUX_CULTURELS/MapServer/0/query?outFields=*&where=1%3D1&f=geojson' -o ../data/museum_data_raw.json
+fi
