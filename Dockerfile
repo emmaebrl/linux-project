@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 WORKDIR /app
-#EXPOSE 8501
+EXPOSE 5002
 
 # Définir les variables d'environnement pour Streamlit
 #ENV STREAMLIT_SERVER_PORT=8501
