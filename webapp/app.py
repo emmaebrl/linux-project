@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking
+from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking, get_museum_data, afficher_infos_museum
 
 st.title("Nom de l'application")
 
@@ -23,7 +23,7 @@ if st.button("Rechercher"):
         
         if street_data is not None:
             st.success(f"Informations sur {user_input} :")
-            tab1, tab2 = st.tabs(["Caractéristiques", "Parkings à proximité"])
+            tab1, tab2, tab3 = st.tabs(["Caractéristiques", "Parkings à proximité", "Musées à proximité"])
             with tab1:
                 afficher_infos_voie(street_data)
 
@@ -32,6 +32,12 @@ if st.button("Rechercher"):
                     afficher_infos_parking(parking_data)
                 else:
                     st.write("Aucun parking trouvé à proximité.")
+            with tab3:
+                museum_data = get_museum_data(user_input)
+                if not museum_data.empty:
+                    afficher_infos_museum(museum_data)
+                else:
+                    st.write("Aucun musée trouvé à proximité.")
     else:
         st.error("Veuillez entrer un nom de rue pour lancer la recherche.")
 
@@ -49,5 +55,11 @@ if st.session_state.suggestion:
                     afficher_infos_parking(parking_data)
                 else:
                     st.write("Aucun parking trouvé à proximité.")
+            with tab3:
+                museum_data = get_museum_data(user_input)
+                if not museum_data.empty:
+                    afficher_infos_museum(museum_data)
+                else:
+                    st.write("Aucun musée trouvé à proximité.")
         else:
             st.error(f"Aucune information trouvée pour '{st.session_state.suggestion}'.")
