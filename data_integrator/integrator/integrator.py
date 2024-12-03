@@ -1,24 +1,18 @@
 import pandas as pd
 import json
-import re
-from unidecode import unidecode
-
-def normalize_string(s):
-    if pd.isna(s):
-        return ""
-    s = unidecode(s) 
-    s = re.sub(r'[^\w]', '', s) 
-    s = s.lower()
-    s = s.replace("de", "") 
-    s = s.replace("av", "avenue")
-    s = s.replace("bd", "boulevard")
-    s = s.replace("pl", "place")
-    return s
-
-
+from utils import normalize_string
 
 
 # Chemin des fichiers de données
+
+def get_raw_data_path(data_name):
+    return f"../../data/{data_name}_data_raw.csv"
+
+def get_staged_data_path(data_name):
+    return f"../../data/{data_name}_data_staged.csv"
+
+
+
 street_data_raw_path = "../../data/street_data_raw.csv"
 street_data_staged_path = "../../data/street_data_staged.csv"
 parking_data_raw_path = "../../data/parking_data_raw.csv"
