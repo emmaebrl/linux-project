@@ -2,135 +2,176 @@ import pandas as pd
 import sys
 from difflib import get_close_matches
 import codecs
-from utils import column_renaming
+from utils import get_staged_data_path
 
-sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 
-# Récupérer la recherche de l'utilisateur
-if len(sys.argv) < 2:
-    print("Error: Please provide a search term as an argument.")
-    sys.exit(1)
-
-research = sys.argv[1].strip().upper()
-print(f"Extracting information about {research}")
-
-# Chemins des fichiers
-street_data_staged_path = "../data/street_data_staged.csv"
-
-parking_data_staged_path = "../data/parking_data_staged.csv"
-museum_data_staged_path = "../data/museum_data_staged.csv"
-
-# Charger les données
-try:
-    street_data_staged = pd.read_csv(street_data_staged_path)
-    parking_data_staged = pd.read_csv(parking_data_staged_path, sep=",")
-    museum_data_staged = pd.read_csv(museum_data_staged_path)
-except FileNotFoundError as e:
-    print(f"Error: {e}")
-    sys.exit(1)
-
-if research not in street_data_staged["typo"].values:
-    print(f"No exact match found for '{research}'. Looking for close matches...")
-    suggestions = get_close_matches(research, street_data_staged["typo"].unique(), n=3, cutoff=0.6)
-
-    if suggestions:
-        print("Did you mean one of the following?")
-        for i, suggestion in enumerate(suggestions, 1):
-            print(f"{i}. {suggestion}")
-
-        print("Enter the number of the correct match, or 0 to exit.")
-        try:
-            choice = int(input("Your choice: ").strip())
-            if choice == 0:
-                print("Exiting script. No match selected.")
-                sys.exit(1)
-            elif 1 <= choice <= len(suggestions):
-                research = suggestions[choice - 1]
-            else:
-                print("Invalid choice. Exiting script.")
-                sys.exit(1)
-        except ValueError:
-            print("Invalid input. Please enter a number. Exiting script.")
-            sys.exit(1)
-    else:
-        print("No close matches found. Exiting script.")
+def load_data():
+    """Load all required datasets."""
+    try:
+        street_data = pd.read_csv(get_staged_data_path("street"))
+        parking_data = pd.read_csv(get_staged_data_path("parking"), sep=",")
+        museum_data = pd.read_csv(get_staged_data_path("museum"))
+        toilets_data = pd.read_csv(get_staged_data_path("toilets"))
+        return street_data, parking_data, museum_data, toilets_data
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
         sys.exit(1)
 
-print(f"Exact match found for '{research}'")
-filtered_street_data = street_data_staged[street_data_staged["typo"] == research].copy()
 
-if filtered_street_data.empty:
-    print(f"No data found for '{research}'. This should not happen if a suggestion was accepted.")
-    sys.exit(1)
+def get_user_input():
+    """Retrieve and validate user input."""
+    if len(sys.argv) < 2:
+        print("Error: Please provide a search term as an argument.")
+        sys.exit(1)
+    return sys.argv[1].strip().upper()
 
-# Fonction pour trouver une correspondance dans les adresses
-def find_match(adresse, typo_list):
-    for typo in typo_list:
-        if typo in adresse:
-            return typo
-    return None
 
-# Trouver les correspondances pour les adresses normalisées
-typo_list = filtered_street_data['typo_normalized'].tolist()
-parking_data_staged["typo_match"] = parking_data_staged["adresse_normalized"].apply(lambda x: find_match(x, typo_list))
-filtered_parking_data = parking_data_staged[parking_data_staged["typo_match"].notna()].copy()
-filtered_parking_data.rename(columns=column_renaming, inplace=True)
+def find_closest_match(research, data, column):
+    """Find exact or close matches in the data."""
+    if research not in data[column].values:
+        print(f"No exact match found for '{research}'. Looking for close matches...")
+        suggestions = get_close_matches(research, data[column].unique(), n=3, cutoff=0.6)
+        if suggestions:
+            print("Did you mean one of the following?")
+            for i, suggestion in enumerate(suggestions, 1):
+                print(f"{i}. {suggestion}")
+            return suggestions
+        else:
+            print("No close matches found. Exiting script.")
+            sys.exit(1)
+    return [research]
 
-# Conversion des colonnes numériques
-numeric_columns = [
-    "Nombre de Places", "Places PMR", "Places Voitures Électriques",
-    "Tarif 1h (€)","Tarif 2h (€)","Tarif 3h (€)","Tarif 4h (€)", "Tarif 24h (€)", "Hauteur Max (cm)"
-]
-filtered_parking_data[numeric_columns] = filtered_parking_data[numeric_columns].apply(pd.to_numeric, errors="coerce")
 
-# Remplir les valeurs manquantes
-filtered_parking_data.fillna({"Gratuit": "Non Spécifié"}, inplace=True)
-filtered_parking_data["Nombre de Places"] = filtered_parking_data["Nombre de Places"].fillna(0).astype(int)
+def select_match(suggestions):
+    """Prompt the user to select a match from suggestions."""
+    print("Enter the number of the correct match, or 0 to exit.")
+    try:
+        choice = int(input("Your choice: ").strip())
+        if choice == 0:
+            print("Exiting script. No match selected.")
+            sys.exit(1)
+        elif 1 <= choice <= len(suggestions):
+            return suggestions[choice - 1]
+        else:
+            print("Invalid choice. Exiting script.")
+            sys.exit(1)
+    except ValueError:
+        print("Invalid input. Please enter a number. Exiting script.")
+        sys.exit(1)
 
-# Générer une description
-if not filtered_parking_data.empty:
-    filtered_parking_data["Description"] = (
-        "Nom : " + filtered_parking_data["Nom"].astype(str) + "\n" +
-        "Adresse : " + filtered_parking_data["Adresse"].astype(str) + "\n" +
-        "Arrondissement : " + filtered_parking_data["Arrondissement"].astype(str) + "\n" +
-        "Nombre de Places : " + filtered_parking_data["Nombre de Places"].astype(str) + "\n" +
-        "Tarif 1h : " + filtered_parking_data["Tarif 1h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
-        "Tarif 2h : " + filtered_parking_data["Tarif 2h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
-        "Tarif 3h : " + filtered_parking_data["Tarif 3h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
-        "Tarif 4h : " + filtered_parking_data["Tarif 4h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
-        "Tarif 24h : " + filtered_parking_data["Tarif 24h (€)"].map(lambda x: f"{x:.2f} €" if pd.notna(x) else "Non Disponible") + "\n" +
-        "Type Usagers : " + filtered_parking_data["Type Usagers"].fillna("Non Spécifié").astype(str) + "\n" +
-        "Gratuit : " + filtered_parking_data["Gratuit"].astype(str) + "\n"
-)
 
-print(typo_list)
-museum_data_staged["typo_match"] = museum_data_staged["adresse_normalized"].apply(lambda x: find_match(x, typo_list))
-filtered_museum_data = museum_data_staged[museum_data_staged["typo_match"].notna()].copy()
+def process_street_data(street_data):
+    """Process street data to filter and enhance it."""
+    if not street_data.empty:
+        street_data["Description"] = (
+            "Historical name: " + street_data["historique"].astype(str) + "\n" +
+            "Original name: " + street_data["orig"].astype(str) + "\n" +
+            "District: " + street_data["arrdt"].astype(str) + "\n" +
+            "Street Type: " + street_data["typvoie"].astype(str) + "\n" +
+            "Neighborhood: " + street_data["quartier"].astype(str) + "\n" +
+            "Length: " + street_data["longueur"].astype(str) + " m" + "\n" +
+            "Width: " + street_data["largeur"].astype(str) + " m" + "\n"
+        )
+    return street_data
 
-# Afficher les résultats
-print("------------------RESULTATS------------------")
-if not filtered_street_data.empty:
-    print(f"Historical name : {filtered_street_data['historique'].iloc[0]}")
-    print(f"Original name : {filtered_street_data['orig'].iloc[0]}")
-    print(f"Arrondissement : {filtered_street_data['arrdt'].iloc[0]}")
-    print(f"Type de Voie : {filtered_street_data['typvoie'].iloc[0]}")
-    print(f"Quartier : {filtered_street_data['quartier'].iloc[0]}")
-    print(f"Longueur : {filtered_street_data['longueur'].iloc[0]}")
-    print(f"Largeur : {filtered_street_data['largeur'].iloc[0]}")
-  
-if not filtered_parking_data.empty:
-    print("\nDescription des parkings:")
-    for description in filtered_parking_data["Description"]:
-        print(description)
-else:
-    print("No parking data found for the given query.")
 
-if not filtered_museum_data.empty:
-    print("\nMusées à proximité:")
-    for _, row in filtered_museum_data.iterrows():
-        print(f"Nom : {row['name']}")
-        print(f"Adresse : {row['adresse']}")
-        print("\n")
-else:
-    print("No museum data found for the given query.")
-    
+def process_parking_data(parking_data, typo_list):
+    """Process parking data to filter and enhance it."""
+    parking_data["typo_match"] = parking_data["adresse_normalized"].apply(
+        lambda x: next((typo for typo in typo_list if typo in x), None)
+    )
+    filtered_parking_data = parking_data[parking_data["typo_match"].notna()].copy()
+    if not filtered_parking_data.empty:
+        filtered_parking_data["Description"] = (
+            "Name: " + filtered_parking_data["nom"].astype(str) + "\n" +
+            "Address: " + filtered_parking_data["adresse"].astype(str) + "\n" +
+            "Number of Spaces: " + filtered_parking_data["nb_places"].astype(str) + "\n" +
+            "Rate 1h: " + filtered_parking_data["tarif_1h"].map(lambda x: f"{x:.2f} €" if x != "not specified" else x) + "\n" +
+            "Rate 2h: " + filtered_parking_data["tarif_2h"].map(lambda x: f"{x:.2f} €" if x != "not specified" else x) + "\n" +
+            "Rate 3h: " + filtered_parking_data["tarif_3h"].map(lambda x: f"{x:.2f} €" if x != "not specified" else x) + "\n" +
+            "Rate 4h: " + filtered_parking_data["tarif_4h"].map(lambda x: f"{x:.2f} €" if x != "not specified" else x) + "\n" +
+            "Rate 24h: " + filtered_parking_data["tarif_24h"].map(lambda x: f"{x:.2f} €" if x != "not specified" else x) + "\n" +
+            "Free: " + filtered_parking_data["gratuit"].astype(str) + "\n"
+        )
+    return filtered_parking_data
+
+
+def process_museum_data(museum_data, typo_list):
+    """Process museum data to filter and enhance it."""
+    museum_data["typo_match"] = museum_data["adresse_normalized"].apply(
+        lambda x: next((typo for typo in typo_list if typo in x), None)
+    )
+    filtered_museum_data = museum_data[museum_data["typo_match"].notna()].copy()
+    if not filtered_museum_data.empty:
+        filtered_museum_data["Description"] = (
+            "Name: " + filtered_museum_data["name"].astype(str) + "\n" +
+            "Address: " + filtered_museum_data["adresse"].astype(str) + "\n" 
+        )
+    return filtered_museum_data
+
+
+def process_toilets_data(toilets_data, typo_list):
+    """Process toilets data to filter and enhance it."""
+    toilets_data["typo_match"] = toilets_data["adresse_normalized"].astype(str).apply(
+        lambda x: next((typo for typo in typo_list if typo in x), None)
+    )
+    filtered_toilets_data = toilets_data[toilets_data["typo_match"].notna()].copy()
+    if not filtered_toilets_data.empty:
+        filtered_toilets_data["Description"] = (
+            "Address: " + filtered_toilets_data["ADRESSE"].astype(str) + "\n" +
+            "Accessible for disabled persons: " + filtered_toilets_data["ACCES_PMR"].astype(str) + "\n"
+        )
+    return filtered_toilets_data
+
+
+def main():
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
+    research = get_user_input()
+    print(f"Extracting information about {research}...")
+
+    street_data, parking_data, museum_data, toilets_data = load_data()
+    suggestions = find_closest_match(research, street_data, "typo")
+
+    if len(suggestions) > 1:
+        research = select_match(suggestions)
+    else:
+        research = suggestions[0]
+
+    print(f"Exact match found for '{research}'")
+    filtered_street_data = street_data[street_data["typo"] == research].copy()
+    if filtered_street_data.empty:
+        print(f"No data found for '{research}'. This should not happen if a suggestion was accepted.")
+        sys.exit(1)
+
+    filtered_street_data = process_street_data(filtered_street_data)
+    typo_list = filtered_street_data["typo_normalized"].tolist()
+
+    filtered_parking_data = process_parking_data(parking_data, typo_list)
+    filtered_museum_data = process_museum_data(museum_data, typo_list)
+    filtered_toilets_data = process_toilets_data(toilets_data, typo_list)
+
+    print("\n------------------RESULTS------------------")
+    print("Street Information:")
+    print("\n".join(filtered_street_data["Description"]))
+
+    if not filtered_parking_data.empty:
+        print("\nParking Information:")
+        print("\n".join(filtered_parking_data["Description"]))
+    else:
+        print("No parking data found for the given query.")
+
+    if not filtered_museum_data.empty:
+        print("\nMuseum Information:")
+        print("\n".join(filtered_museum_data["Description"]))
+    else:
+        print("No museum data found for the given query.")
+
+    if not filtered_toilets_data.empty:
+        print("\nPublic Toilets Information:")
+        print("\n".join(filtered_toilets_data["Description"]))
+    else:
+        print("No public toilets data found for the given query.")
+
+
+if __name__ == "__main__":
+    main()
