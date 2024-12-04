@@ -42,3 +42,11 @@ else
   echo "Downloading data from opendata"
  curl 'https://carto2.apur.org/apur/rest/services/OPENDATA/LIEUX_CULTURELS/MapServer/0/query?outFields=*&where=1%3D1&f=geojson' -o ../data/museum_data_raw.json
 fi
+
+# Téléchargement des informations sur les sports
+if [ -f "../data/sports_data_raw.json" ] && [ "$update" = false ]; then
+  echo "sports data already exists. Skipping download because overwrite is set to false."
+else
+  echo "Downloading data from opendata"
+ curl 'https://carto2.apur.org/apur/rest/services/OPENDATA/EQUIPEMENT_PONCTUEL/MapServer/3/query?outFields=*&where=1%3D1&f=geojson' -o ../data/sports_data_raw.json
+fi

@@ -1,168 +1,135 @@
 import pandas as pd
-import sys
-from difflib import get_close_matches
 import streamlit as st
 import folium
 from streamlit_folium import folium_static
+from googletrans import Translator
+from difflib import get_close_matches
+
+# Constants
+DATA_PATHS = {
+    "streets": "data/street_data_staged.csv",
+    "parking": "data/parking_data_staged.csv",
+    "toilets": "data/toilets_data_staged.csv",
+    "museums": "data/museum_data_staged.csv",
+    "sports": "data/sports_data_staged.csv"
+}
+
+# Load datasets
+data = pd.read_csv(DATA_PATHS["streets"])
+data_parking = pd.read_csv(DATA_PATHS["parking"])
+data_toilets = pd.read_csv(DATA_PATHS["toilets"])
+data_museums = pd.read_csv(DATA_PATHS["museums"])
+data_sports = pd.read_csv(DATA_PATHS["sports"])
+
+# Utility functions
+def translate_text(text, dest="en"):
+    """Translates a given text to the target language."""
+    translator = Translator()
+    return translator.translate(text, dest=dest).text
+
+def format_arrondissement(arr):
+    """Formats arrondissement codes to match expected formats."""
+    if len(arr) == 1:
+        return "7500" + arr
+    elif len(arr) == 2:
+        return "750" + arr
+    return arr
 
 
-DATA_PATH = "data/street_data_staged.csv"
-DATA_PATH_PARKING = "data/parking_data_staged.csv"
-DATA_PATH_TOILETS = "data/toilets_data_staged.csv"
-DATA_PATH_MUSEUM = "data/museum_data_staged.csv"
-
-data = pd.read_csv(DATA_PATH)
-data_parking = pd.read_csv(DATA_PATH_PARKING)
-data_museum = pd.read_csv(DATA_PATH_MUSEUM)
-data_toilets = pd.read_csv(DATA_PATH_TOILETS)
-
-
-def get_street_data(street):
-    """Retourne des informations sur une rue, avec suggestions si nécessaire."""
-    research = street.strip().upper()
-    if research not in data["typo"].values:
-        suggestions = get_close_matches(research, data["typo"].unique(), n=1, cutoff=0.7)
+# Core functions
+def get_street_data(street_name):
+    """Returns information about a street, with suggestions if needed."""
+    search_term = street_name.strip().upper()
+    if search_term not in data["typo"].values:
+        suggestions = get_close_matches(search_term, data["typo"].unique(), n=1, cutoff=0.7)
         if suggestions:
-            return None, suggestions[0] 
+            return None, suggestions[0]
         else:
             return None, None
-    data.astype('string').fillna("Information non disponible", inplace=True)
-    filtered_data = data[data["typo"] == research]
-    return filtered_data, None
+    street_data = data[data["typo"] == search_term]
+    street_data["historique"] = street_data["historique"].apply(translate_text)
+    street_data["orig"] = street_data["orig"].apply(translate_text)
+    return street_data, None
 
-def afficher_infos_voie(data):
-    st.write(f"- **Nom historique :** {data['historique'].values[0]}")
-    st.write(f"- **Nom original :** {data['orig'].values[0]}")
-    st.write(f"- **Type de voie :** {data['typvoie'].values[0]}")
-    st.write(f"- **Arrondissement :** {data['arrdt'].values[0]}")
-    st.write(f"- **Quartier :** {data['quartier'].values[0]}")
-    st.write(f"- **Longueur :** {data['longueur'].values[0]}")
-    st.write(f"- **Largeur :** {data['largeur'].values[0]}")
-
-def get_parking_data(street, arrondissement=None):
-    """Retourne les parkings à proximité d'une rue, éventuellement filtrés par arrondissement."""
-    parking_data = pd.DataFrame()  # Initialize as empty DataFrame
+def get_nearby_data(data_source, street_name, arrondissement=None, arr_col=None):
+    """Returns nearby data (e.g., parking, toilets, museums) filtered by street and/or arrondissement."""
     if arrondissement:
-        arrondissements = arrondissement.split(",")
-        arrondissements_formatted = []
-        for arrondissement in arrondissements:
-            if len(arrondissement) == 1:
-                arrondissement = "7500" + arrondissement
-            elif len(arrondissement) == 2:
-                arrondissement = "750" + arrondissement
-            arrondissements_formatted.append(arrondissement)
-        parking_data = data_parking[data_parking['adresse'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
+        arr_list = [format_arrondissement(a.strip()) for a in arrondissement.split(",")]
+        print(arr_list)
+        data_source = data_source[data_source[arr_col].astype(str).apply(lambda x: any(arr in x for arr in arr_list))]
+        print(data_source)
     else:
-        parking_data = data_parking[data_parking['adresse'].str.contains(street, case=False, na=False)]
-    parking_data = parking_data.dropna(subset=['Ylat', 'Xlong'])
-    return parking_data
+        data_source = data_source[data_source["adresse_normalized"].str.contains(street_name, case=False, na=False)]
+    return data_source.dropna(subset=['Ylat', 'Xlong'])
 
+def display_map(data_source, lat_col, long_col, popup_generator, section):
+    """Displays a Folium map with markers based on data source."""
+    if data_source.empty:
+        st.info(f"🚫 No nearby {section} found.")
+        return None
 
-def afficher_infos_parking(parking_data):
-    if parking_data.empty:
-        st.write("Aucun parking trouvé à proximité.")
-        return
-    
-    localisation = [parking_data.iloc[0]['Ylat'], parking_data.iloc[0]['Xlong']]
-    m = folium.Map(location=localisation, zoom_start=15)
-    
-    for _, row in parking_data.iterrows():
-        if pd.isna(row['Ylat']) or pd.isna(row['Xlong']):
-            continue 
-        
-        popup_content = f"""
-            <b>Adresse:</b> {row['adresse']}<br>
-            <b>Tarif 1h:</b> {row['tarif_1h']} €<br>
-            <b>Hauteur max:</b> {row['hauteur_max']} cm
-        """
+    center = [data_source.iloc[0][lat_col], data_source.iloc[0][long_col]]
+    m = folium.Map(location=center, zoom_start=15)
+
+    for _, row in data_source.iterrows():
+        popup = folium.Popup(popup_generator(row), max_width=300)
         folium.Marker(
-            location=[row['Ylat'], row['Xlong']],
-            popup=folium.Popup(popup_content, max_width=300),
-            tooltip=row['adresse']
+            location=[row[lat_col], row[long_col]],
+            popup=popup,
+            tooltip=row["adresse"]
         ).add_to(m)
     
     folium_static(m)
 
-def get_toilets_data(street, arrondissement=None):
-    """Retourne les toilettes à proximité d'une rue, éventuellement filtrés par arrondissement."""
-    toilets_data = pd.DataFrame()  # Initialize as empty DataFrame
-    if arrondissement:
-        arrondissements = arrondissement.split(",")
-        arrondissements_formatted = []
-        for arrondissement in arrondissements:
-            if len(arrondissement) == 1:
-                arrondissement = "7500" + arrondissement
-            elif len(arrondissement) == 2:
-                arrondissement = "750" + arrondissement
-            arrondissements_formatted.append(arrondissement)
-        data_toilets['ARRONDISSEMENT'] = data_toilets['ARRONDISSEMENT'].astype(str)
+def parking_popup(row):
+    """Generates HTML content for parking markers."""
+    return f"""
+        <b>Address:</b> {row['adresse']}<br>
+        <b>Rate (1h):</b> {row['tarif_1h']} €<br>
+        <b>Max Height:</b> {row['hauteur_max']} cm
+    """
 
-        toilets_data = data_toilets[data_toilets['ARRONDISSEMENT'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
-    else:
-        toilets_data = data_toilets[data_toilets['adresse_normalized'].str.contains(street, case=False, na=False)]
-    toilets_data = toilets_data.dropna(subset=['latitude', 'longitude'])
-    return toilets_data
+def toilet_popup(row):
+    """Generates HTML content for toilet markers."""
+    return f"""
+        <b>Accessibility:</b> {row['ACCES_PMR']}<br>
+        <b>Schedule:</b> {row['HORAIRE']}<br>
+    """
 
+def museum_popup(row):
+    """Generates HTML content for museum markers."""
+    return f"""
+        <b>Name:</b> {row['name']}<br>
+        <b>Address:</b> {row['adresse']}
+    """
 
-def get_museum_data(street, arrondissement=None):
-    """Retourne les musées à proximité d'une rue."""
-    museum_data = pd.DataFrame()
-    if arrondissement:
-        arrondissements = arrondissement.split(",")
-        arrondissements_formatted = []
-        for arrondissement in arrondissements:
-            if len(arrondissement) == 1:
-                arrondissement = "7500" + arrondissement
-            elif len(arrondissement) == 2:
-                arrondissement = "750" + arrondissement
-            arrondissements_formatted.append(arrondissement)
-        data_museum['c_postal'] = data_museum['c_postal'].astype(str)
-        museum_data = data_museum[data_museum['c_postal'].apply(lambda x: any(arr in x for arr in arrondissements_formatted))]
-    else:
-        museum_data = data_museum[data_museum['adresse'].str.contains(street, case=False, na=False)]
-    museum_data = museum_data.dropna(subset=['Ylat', 'Xlong'])
-    return museum_data
+def sports_popup(row):
+    """Generates HTML content for sports facility markers."""
+    return f"""
+        <b>Name:</b> {row['name']}<br>
+        <b>Address:</b> {row['adresse']}
+    """
+# Display functions
+def display_street_info(street_data):
+    """Displays detailed information about a street."""
+    st.write(f"- **Historical Name:** {street_data['historique'].values[0]}")
+    st.write(f"- **Original Name:** {street_data['orig'].values[0]}")
+    st.write(f"- **District:** {street_data['arrdt'].values[0]}")
+    st.write(f"- **Neighborhood:** {street_data['quartier'].values[0]}")
 
-def afficher_infos_toilets(toilets_data):
-    if toilets_data.empty:
-        st.write("Aucune toilette trouvée à proximité.")
-        return
-    
-    localisation = [toilets_data.iloc[0]['latitude'], toilets_data.iloc[0]['longitude']]
-    m = folium.Map(location=localisation, zoom_start=15)
-    
-    for _, row in toilets_data.iterrows():
-        if pd.isna(row['latitude']) or pd.isna(row['longitude']):
-            continue 
-        
-        popup_content = f"""
-            <b>Accès PMR:</b> {row['ACCES_PMR']}<br>
-            <b>Horaire:</b> {row['HORAIRE']}<br>
-        """
-        folium.Marker(
-            location=[row['latitude'], row['longitude']],
-            popup=folium.Popup(popup_content, max_width=300),
-            tooltip=row['ADRESSE']
-        ).add_to(m)
-    folium_static(m)
+def display_parking_data(street_name, arrondissement=None):
+    parking_data = get_nearby_data(data_parking, street_name, arrondissement, arr_col="adresse")
+    display_map(parking_data, "Ylat", "Xlong", parking_popup, "parking")
 
-        
+def display_toilet_data(street_name, arrondissement=None):
+    toilet_data = get_nearby_data(data_toilets, street_name, arrondissement, arr_col= "ARRONDISSEMENT")
+    display_map(toilet_data, "Ylat", "Xlong", toilet_popup, "toilets")
 
-def afficher_infos_museum(museum_data):
-    localisation = [museum_data.iloc[0]['Ylat'], museum_data.iloc[0]['Xlong']]
-    m = folium.Map(location=localisation, zoom_start=15)
-    
-    for _, row in museum_data.iterrows():
-        # Information affichée dans la pop-up en HTML
-        popup_content = f"""
-            <b>Name:</b> {row['name']}<br>
-            <b>Adresse:</b> {row['adresse']}<br>
-            """
-        # Forme du Marker
-        folium.Marker(
-            location=[row['Ylat'], row['Xlong']],
-            popup=folium.Popup(popup_content),
-            tooltip=row['name']
-        ).add_to(m)
-    
-    folium_static(m)
+def display_museum_data(street_name, arrondissement=None):
+    museum_data = get_nearby_data(data_museums, street_name, arrondissement, arr_col= "c_postal")
+    display_map(museum_data, "Ylat", "Xlong", museum_popup, "museums")
+
+def display_sports_data(street_name, arrondissement=None):
+    sports_data = get_nearby_data(data_sports, street_name, arrondissement, arr_col= "adresse_normalized")
+    print(sports_data)
+    display_map(sports_data, "Ylat", "Xlong", sports_popup, "sports")

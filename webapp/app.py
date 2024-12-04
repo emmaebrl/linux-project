@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-from utils import get_street_data, afficher_infos_voie, get_parking_data, afficher_infos_parking, get_toilets_data, afficher_infos_toilets, get_museum_data, afficher_infos_museum
+from utils import get_street_data, display_museum_data, display_parking_data, display_toilet_data, display_sports_data, display_street_info
 
-# Adding custom styles
+# Custom styles
 st.markdown("""
     <style>
     body {
@@ -45,7 +45,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Main title and subtitle
+# Titles
 st.markdown('<h1 class="main-title">🌟 AroundMe</h1>', unsafe_allow_html=True)
 st.markdown('<h2 class="sub-title">Explore Paris streets and nearby amenities</h2>', unsafe_allow_html=True)
 
@@ -55,101 +55,65 @@ if "suggestion" not in st.session_state:
 if "current_input" not in st.session_state:
     st.session_state.current_input = None
 
-# Create columns for aligning the search bar and button
-col1, col2 = st.columns([4, 1])  # Adjust column proportions
+# Input and search button layout
+col1, col2 = st.columns([4, 1])
 with col1:
     user_input = st.text_input("🔍 Enter a street name:", placeholder="Example: Champs-Élysées")
 with col2:
-    st.markdown("<br>", unsafe_allow_html=True)  # Add spacing for vertical alignment
+    st.markdown("<br>", unsafe_allow_html=True)
     search = st.button("Search")
 
-# Search management
-if search:
-    if user_input.strip():
-        parking_data = pd.DataFrame()
-        street_data, suggestion = get_street_data(user_input)
-        st.session_state.current_input = user_input
-        st.session_state.suggestion = suggestion
+def display_results(street_name):
+    """Fetch and display results for a given street name."""
+    # Fetch street data
+    street_data, suggestion = get_street_data(street_name)
+    st.session_state.suggestion = suggestion
 
-        if street_data is not None:            
-            st.success(f"✅ Results for *{user_input}*:")
-            arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
-            parking_data = get_parking_data(user_input, arrondissement)
-            toilets_data = get_toilets_data(user_input, arrondissement)
-            museum_data = get_museum_data(user_input, arrondissement)
+    if street_data is not None:
+        st.success(f"✅ Results for *{street_name}*:")
+        arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
+        
+        # Display results in tabs
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "📜 Street Details",
+            "🚗 Nearby Parking",
+            "🚻 Nearby Toilets",
+            "🏛️ Nearby Museums",
+            "🏀 Nearby Sports"
+        ])
 
-            # Display results in tabs
-            tab1, tab2, tab3, tab4 = st.tabs([
-                "📜 Street Details",
-                "🚗 Nearby Parking",
-                "🚻 Nearby Toilets",
-                "🏛️ Nearby Museums"
-            ])
-
-            with tab1:
-                st.markdown("### Street Details")
-                afficher_infos_voie(street_data)
-            with tab2:
-                st.markdown("### Nearby Parking")
-                if not parking_data.empty:
-                    afficher_infos_parking(parking_data)
-                else:
-                    st.info("🚫 No nearby parking found.")
-            with tab3:
-                st.markdown("### Nearby Toilets")
-                if not toilets_data.empty:
-                    afficher_infos_toilets(toilets_data)
-                else:
-                    st.info("🚫 No nearby toilets found.")
-            with tab4:
-                st.markdown("### Nearby Museums")
-                if not museum_data.empty:
-                    afficher_infos_museum(museum_data)
-                else:
-                    st.info("🚫 No nearby museums found.")
+        with tab1:
+            st.markdown("### Street Details")
+            display_street_info(street_data)
+            
+        with tab2:
+            st.markdown("### Nearby Parking")
+            display_parking_data(street_name, arrondissement)
+        with tab3:
+            st.markdown("### Nearby Toilets")
+            display_toilet_data(street_name, arrondissement)
+        with tab4:
+            st.markdown("### Nearby Museums")
+            display_museum_data(street_name, arrondissement)
+        with tab5:
+            st.markdown("### Nearby Sports")
+            display_sports_data(street_name, arrondissement)
     else:
-        st.error("❌ Please enter a street name to start the search.")
+        st.error("❌ No results found. Please try another street name.")
+        if suggestion:
+            st.info(f"💡 Did you mean: **{suggestion}**?")
 
-# Suggestion management
+# Search logic
+if search and user_input.strip():
+    st.session_state.current_input = user_input
+    display_results(user_input)
+elif search:
+    st.error("❌ Please enter a street name to start the search.")
+
+# Handle suggestion
 if st.session_state.suggestion:
     if st.button(f"💡 Suggestion: Try with '{st.session_state.suggestion}'"):
-        parking_data = pd.DataFrame()
-        street_data, suggestion = get_street_data(st.session_state.suggestion)
+        display_results(st.session_state.suggestion)
 
-        if street_data is not None:
-            arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
-            museum_data = get_museum_data(st.session_state.suggestion, arrondissement)
-            parking_data = get_parking_data(st.session_state.suggestion, arrondissement)
-            toilets_data = get_toilets_data(st.session_state.suggestion, arrondissement)
-
-            st.success(f"✅ Results for *{st.session_state.suggestion}*:")
-            tab1, tab2, tab3, tab4 = st.tabs([
-                "📜 Street Details",
-                "🚗 Nearby Parking",
-                "🚻 Nearby Toilets",
-                "🏛️ Nearby Museums"
-            ])
-            with tab1:
-                st.markdown("### Street Details")
-                afficher_infos_voie(street_data)
-            with tab2:
-                st.markdown("### Nearby Parking")
-                if not parking_data.empty:
-                    afficher_infos_parking(parking_data)
-                else:
-                    st.info("🚫 No nearby parking found.")            
-            with tab3:
-                st.markdown("### Nearby Toilets")
-                if not toilets_data.empty:
-                    afficher_infos_toilets(toilets_data)
-                else:
-                    st.info("🚫 No nearby toilets found.")
-            with tab4:
-                st.markdown("### Nearby Museums")
-                if not museum_data.empty:
-                    afficher_infos_museum(museum_data)
-                else:
-                    st.info("🚫 No nearby museums found.")
-                    
 # Footer
 st.markdown('<div class="footer"><p>Powered by AroundMe - Explore Paris, One Street at a Time</p></div>', unsafe_allow_html=True)

@@ -3,5 +3,5 @@ cd data_loader
 bash run.sh \
 && cd ../data_integrator \
 && bash run.sh \
-&& cd .. \
+&& cd .. 
 streamlit run webapp/app.py --server.port=5002 

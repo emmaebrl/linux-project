@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 from difflib import get_close_matches
 import codecs
-from utils import get_staged_data_path
+from utils import get_staged_data_path, translate_text
 
 
 def load_data():
@@ -12,7 +12,8 @@ def load_data():
         parking_data = pd.read_csv(get_staged_data_path("parking"), sep=",")
         museum_data = pd.read_csv(get_staged_data_path("museum"))
         toilets_data = pd.read_csv(get_staged_data_path("toilets"))
-        return street_data, parking_data, museum_data, toilets_data
+        sports_data = pd.read_csv(get_staged_data_path("sports"))
+        return street_data, parking_data, museum_data, toilets_data, sports_data
     except FileNotFoundError as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -63,14 +64,13 @@ def select_match(suggestions):
 def process_street_data(street_data):
     """Process street data to filter and enhance it."""
     if not street_data.empty:
+        street_data["historique"] = street_data["historique"].apply(translate_text)
+        street_data["orig"] = street_data["orig"].apply(translate_text)
         street_data["Description"] = (
             "Historical name: " + street_data["historique"].astype(str) + "\n" +
             "Original name: " + street_data["orig"].astype(str) + "\n" +
             "District: " + street_data["arrdt"].astype(str) + "\n" +
-            "Street Type: " + street_data["typvoie"].astype(str) + "\n" +
-            "Neighborhood: " + street_data["quartier"].astype(str) + "\n" +
-            "Length: " + street_data["longueur"].astype(str) + " m" + "\n" +
-            "Width: " + street_data["largeur"].astype(str) + " m" + "\n"
+            "Neighborhood: " + street_data["quartier"].astype(str) + "\n"
         )
     return street_data
 
@@ -123,13 +123,26 @@ def process_toilets_data(toilets_data, typo_list):
         )
     return filtered_toilets_data
 
+def process_sports_data(sports_data, typo_list):
+    """Process sports data to filter and enhance it."""
+    sports_data["typo_match"] = sports_data["adresse_normalized"].astype(str).apply(
+        lambda x: next((typo for typo in typo_list if typo in x), None)
+    )
+    filtered_sports_data = sports_data[sports_data["typo_match"].notna()].copy()
+    if not filtered_sports_data.empty:
+        filtered_sports_data["Description"] = (
+            "Name: " + filtered_sports_data["name"].astype(str) + "\n" +
+            "Address: " + filtered_sports_data["adresse"].astype(str) + "\n" 
+        )
+    return filtered_sports_data
+
 
 def main():
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
     research = get_user_input()
     print(f"Extracting information about {research}...")
 
-    street_data, parking_data, museum_data, toilets_data = load_data()
+    street_data, parking_data, museum_data, toilets_data, sports_data = load_data()
     suggestions = find_closest_match(research, street_data, "typo")
 
     if len(suggestions) > 1:
@@ -149,7 +162,8 @@ def main():
     filtered_parking_data = process_parking_data(parking_data, typo_list)
     filtered_museum_data = process_museum_data(museum_data, typo_list)
     filtered_toilets_data = process_toilets_data(toilets_data, typo_list)
-
+    filtered_sports_data = process_sports_data(sports_data, typo_list)
+    
     print("\n------------------RESULTS------------------")
     print("Street Information:")
     print("\n".join(filtered_street_data["Description"]))
@@ -172,6 +186,11 @@ def main():
     else:
         print("No public toilets data found for the given query.")
 
+    if not filtered_sports_data.empty:
+        print("\nSports Facilities Information:")
+        print("\n".join(filtered_sports_data["Description"]))
+    else:
+        print("No sports facilities data found for the given query.")
 
 if __name__ == "__main__":
     main()
