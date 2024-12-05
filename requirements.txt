@@ -48,4 +48,4 @@ unidecode==1.3.6
 streamlit==1.40.1
 folium==0.18.0
 streamlit_folium==0.23.2
-googletrans==3.0.0
+googletrans==4.0.0-rc1
