@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Downloading data"
 cd data_loader
 bash run.sh \
 && cd ../data_integrator \
