@@ -2,7 +2,7 @@
 # Je comprends pas pourquoi le while true est là, je le commente pour l'instant parce que ça fait une boucle infinie
 
 #!/bin/bash
-
+tail -f /dev/null
 echo "Downloading data"
 cd data_loader
 bash run.sh \
