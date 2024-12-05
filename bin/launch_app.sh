@@ -2,7 +2,6 @@
 # Je comprends pas pourquoi le while true est là, je le commente pour l'instant parce que ça fait une boucle infinie
 
 #!/bin/bash
-tail -f /dev/null
 echo "Downloading data"
 cd data_loader
 bash run.sh \
@@ -14,3 +13,4 @@ bash run.sh \
 && cd .. \
 && echo "Running the app"
 streamlit run webapp/app.py --server.port=5002 
+tail -f /dev/nulls
