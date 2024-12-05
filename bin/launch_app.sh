@@ -13,4 +13,3 @@ bash run.sh \
 && cd .. \
 && echo "Running the app"
 streamlit run webapp/app.py --server.port=5002 
-tail -f /dev/nulls
