@@ -55,9 +55,7 @@ def get_nearby_data(data_source, street_name, arrondissement=None, arr_col=None)
     """Returns nearby data (e.g., parking, toilets, museums) filtered by street and/or arrondissement."""
     if arrondissement:
         arr_list = [format_arrondissement(a.strip()) for a in arrondissement.split(",")]
-        print(arr_list)
         data_source = data_source[data_source[arr_col].astype(str).apply(lambda x: any(arr in x for arr in arr_list))]
-        print(data_source)
     else:
         data_source = data_source[data_source["adresse_normalized"].str.contains(street_name, case=False, na=False)]
     return data_source.dropna(subset=['Ylat', 'Xlong'])
@@ -85,8 +83,12 @@ def parking_popup(row):
     """Generates HTML content for parking markers."""
     return f"""
         <b>Address:</b> {row['adresse']}<br>
+        <b>Free:</b> {row['gratuit']}<br>
         <b>Rate (1h):</b> {row['tarif_1h']} €<br>
-        <b>Max Height:</b> {row['hauteur_max']} cm
+        <b>Rate (2h):</b> {row['tarif_2h']} €<br>
+        <b>Rate (3h):</b> {row['tarif_3h']} €<br>
+        <b>Rate (4h):</b> {row['tarif_4h']} €<br>
+        <b>Max Height:</b> {row['hauteur_max']} cm<br>
     """
 
 def toilet_popup(row):
@@ -107,7 +109,6 @@ def sports_popup(row):
     """Generates HTML content for sports facility markers."""
     return f"""
         <b>Name:</b> {row['name']}<br>
-        <b>Address:</b> {row['adresse']}
     """
 # Display functions
 def display_street_info(street_data):
@@ -130,6 +131,5 @@ def display_museum_data(street_name, arrondissement=None):
     display_map(museum_data, "Ylat", "Xlong", museum_popup, "museums")
 
 def display_sports_data(street_name, arrondissement=None):
-    sports_data = get_nearby_data(data_sports, street_name, arrondissement, arr_col= "adresse_normalized")
-    print(sports_data)
+    sports_data = get_nearby_data(data_sports, street_name, arrondissement, arr_col= "c_postal")
     display_map(sports_data, "Ylat", "Xlong", sports_popup, "sports")

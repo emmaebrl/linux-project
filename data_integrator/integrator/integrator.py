@@ -54,9 +54,9 @@ def process_sports_data():
     "Xlong": [feature["geometry"]["coordinates"][0] for feature in sports_data["features"]],
     "Ylat": [feature["geometry"]["coordinates"][1] for feature in sports_data["features"]],
     "name": [feature["properties"]["l_ep_maj"] for feature in sports_data["features"]],
-    "adresse": [f"{feature['properties'].get('n_voie', '')} {feature['properties'].get('c_suf1', '')} {feature['properties'].get('c_suf2', '')} {feature['properties'].get('c_suf3', '')} {feature['properties'].get('c_desi', '')} {feature['properties'].get('c_liaison', '')} {feature['properties'].get('l_voie', '')}" for feature in sports_data["features"]],
     "annee_creation": [feature["properties"]["d_annee_cr"] for feature in sports_data["features"]],
-    "public": [feature["properties"]["b_public"] for feature in sports_data["features"]]
+    "public": [feature["properties"]["b_public"] for feature in sports_data["features"]],
+    "c_postal": [feature["properties"]["c_postal"] for feature in sports_data["features"]],
 })
     sports_data_df["adresse_normalized"] = sports_data_df["adresse"].apply(normalize_adress) # vérifier
     sports_data_df = fill_string_not_specified(sports_data_df)
@@ -68,4 +68,5 @@ if __name__ == "__main__":
     process_parking_data()
     process_toilets_data()
     process_museum_data()
+    process_sports_data()
     print("Integration done!")

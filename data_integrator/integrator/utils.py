@@ -27,7 +27,7 @@ def fill_string_not_specified(data):
 
 def get_data_path(data_name, stage="raw"):
     base_path = Path("../../data")
-    return base_path / f"{data_name}_data_{stage}.{'csv' if stage != 'raw' else 'json' if data_name == 'museum' else 'csv'}"
+    return base_path / f"{data_name}_data_{stage}.{'csv' if stage != 'raw' else 'json' if data_name in ['museum', 'sports'] else 'csv'}"
 
 def load_json_data(file_path):
     with open(file_path, "r") as file:
