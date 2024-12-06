@@ -88,16 +88,16 @@ def display_results(street_name):
             
         with tab2:
             st.markdown("### Nearby Parking")
-            display_parking_data(street_name, arrondissement)
+            display_parking_data(street_name)
         with tab3:
             st.markdown("### Nearby Toilets")
-            display_toilet_data(street_name, arrondissement)
+            display_toilet_data(street_name)
         with tab4:
             st.markdown("### Nearby Museums")
-            display_museum_data(street_name, arrondissement)
+            display_museum_data(street_name)
         with tab5:
             st.markdown("### Nearby Sports")
-            display_sports_data(street_name, arrondissement)
+            display_sports_data(street_name)
     else:
         st.error("❌ No results found. Please try another street name.")
         if suggestion:

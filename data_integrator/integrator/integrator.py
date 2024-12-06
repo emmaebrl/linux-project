@@ -4,8 +4,10 @@ import pandas as pd
 # Traitement des données de rue
 def process_street_data():
     street_data = pd.read_csv(get_data_path("street"))
-    columns_to_keep = ["typo", "orig", "historique", "typvoie", "arrdt", "quartier", "longueur", "largeur"]
+    columns_to_keep = ["typo", "orig", "historique", "typvoie", "arrdt", "quartier", "longueur", "largeur", "geo_point_2d"]
     street_data = street_data[columns_to_keep]
+    street_data["Ylat"] = street_data["geo_point_2d"].str.split(', ', expand=True)[0].astype(float)
+    street_data["Xlong"] = street_data["geo_point_2d"].str.split(', ', expand=True)[1].astype(float)
     street_data["typo_normalized"] = street_data["typo"].apply(normalize_adress)
     street_data = fill_string_not_specified(street_data)
     street_data.to_csv(get_data_path("street", "staged"), index=False)
