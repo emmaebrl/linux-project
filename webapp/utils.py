@@ -73,12 +73,12 @@ def get_nearby_data_within_radius(data_source, street_coords, radius=1):
     data_source["Ylat"] = pd.to_numeric(data_source["Ylat"], errors="coerce")
     data_source["Xlong"] = pd.to_numeric(data_source["Xlong"], errors="coerce")
     data_source = data_source.dropna(subset=["Ylat", "Xlong"])
-    data_source["distance"] = data_source.apply(
-        lambda row: haversine(street_lon, street_lat,  row["Xlong"], row["Ylat"],),
+    data_source.loc[:, "distance"] = data_source.apply(
+        lambda row: haversine(street_lon, street_lat,  row["Xlong"], row["Ylat"]),
         axis=1
     )
     radius = int(radius)
-    data_source["distance"] = data_source["distance"].astype(int)
+    data_source.loc[:, "distance"] = data_source["distance"].astype(int)
     data_source = data_source.dropna(subset=["distance"])
     return data_source[data_source["distance"] <= radius]
 
