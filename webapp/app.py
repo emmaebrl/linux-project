@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from utils import get_street_data, display_museum_data, display_parking_data, display_toilet_data, display_sports_data, display_street_info
 
 # Custom styles
@@ -70,9 +69,7 @@ def display_results(street_name):
     st.session_state.suggestion = suggestion
 
     if street_data is not None:
-        st.success(f"✅ Results for *{street_name}*:")  # Display results
-        arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
-        
+        st.success(f"✅ Results for *{street_name}*:")  # Display results        
         # Display results in tabs
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "📜 Street Details",
