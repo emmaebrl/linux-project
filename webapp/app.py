@@ -70,7 +70,7 @@ def display_results(street_name):
     st.session_state.suggestion = suggestion
 
     if street_data is not None:
-        st.success(f"✅ Results for *{street_name}*:")
+        st.success(f"✅ Results for *{street_name}*:")  # Display results
         arrondissement = str(street_data["arrdt"].values[0]).replace("e", "")
         
         # Display results in tabs
@@ -98,10 +98,7 @@ def display_results(street_name):
         with tab5:
             st.markdown("### Nearby Sports")
             display_sports_data(street_name)
-    else:
-        st.error("❌ No results found. Please try another street name.")
-        if suggestion:
-            st.info(f"💡 Did you mean: **{suggestion}**?")
+
 
 # Search logic
 if search and user_input.strip():
@@ -112,7 +109,7 @@ elif search:
 
 # Handle suggestion
 if st.session_state.suggestion:
-    if st.button(f"💡 Suggestion: Try with '{st.session_state.suggestion}'"):
+    if st.button(f"💡 Suggestion: Try with '{st.session_state.suggestion}'"):  
         display_results(st.session_state.suggestion)
 
 # Footer
