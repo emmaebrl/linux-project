@@ -78,7 +78,8 @@ def get_nearby_data_within_radius(data_source, street_coords, radius=1):
         axis=1
     )
     radius = int(radius)
-    data_source.loc[:, "distance"] = data_source["distance"].astype(int)
+    data_source = data_source.copy()
+    data_source["distance"] = data_source["distance"].astype(int)
     data_source = data_source.dropna(subset=["distance"])
     return data_source[data_source["distance"] <= radius]
 
