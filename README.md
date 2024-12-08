@@ -1,8 +1,8 @@
 # linux-project
-# AroundMe 🇫🇷🗼
+# AroundMe 🗼
 
 ### Pourquoi les Parisiens vont adorer **AroundMe** ?  
-Parce que même s’ils sont perdus, avec AroundMe, ils ne tourneront pas en rond-point !  🇫🇷🗼😂
+Parce que même s’ils sont perdus, avec AroundMe, ils ne tourneront pas en rond-point !  🗼😂
 
 
 **AroundMe** est une application interactive qui vous aide à explorer les environs d'une rue, que vous en connaissiez le nom exact ou non. Tapez une rue parisienne, découvrez son histoire, musées, installations sportives, parkings et meme les toilettes publiques à proximité!
