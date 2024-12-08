@@ -1,66 +1,69 @@
-# linux-project
-# AroundMe 🗼
 
-### Pourquoi les Parisiens vont adorer **AroundMe** ?  
-Parce que même s’ils sont perdus, avec AroundMe, ils ne tourneront pas en rond-point !  🗼😂
-
-
-**AroundMe** est une application interactive qui vous aide à explorer les environs d'une rue, que vous en connaissiez le nom exact ou non. Tapez une rue parisienne, découvrez son histoire, musées, installations sportives, parkings et meme les toilettes publiques à proximité!
----
-
-## 🚀 Fonctionnalités
-
-### 🔍 **Recherche d'informations détaillées sur une rue :**
-- 🏛️ **Nom historique et original** : Découvrez les anciens noms et origines de la rue.  
-- 🗺️ **Quartier et arrondissement** : Plongez dans l’histoire géographique locale.  
-- 📜 **Contexte historique** : Apprenez pourquoi cette rue est spéciale !  
-
-### 💡 **Suggestions automatiques :**
-- 📌 **Trouvez la bonne rue, même si vous vous trompez**. AroundMe vous propose des noms proches en cas d'erreur. Adieu les frustrations !  
-
-### 🗺️ **Exploration interactive des points d'intérêt :**
-- 🚻 **Toilettes publiques**  
-- 🖼️ **Musées**   
-- 🏟️ **Installations sportives**  
-- 🅿️ **Parkings** 
-
-### 🗺️ **Cartographie interactive :**
-- 🌟 **Carte intuitive** : Affichez tous les points d'intérêt à proximité.   
-
-### 🖥️ **Deux modes de lancement :**
-- ⚙️ **Mode terminal** : Idéal pour les utilisateurs techniques ou minimalistes.  
-- 🖼️ **Interface graphique avec Streamlit** : Profitez d’une interface moderne, fluide et esthétique.  
-
-
-
+# linux-project  
+# AroundMe 🗼  
 
 ---
 
-## 🛠️ Étapes d'installation
+## Why will Parisians love **AroundMe**?  
 
-### Étape 1 : Cloner le dépôt
+Because even if they’re lost, with AroundMe, they won’t be going in circles at a roundabout! 🗼😂  
 
-Clonez le dépôt sur votre machine locale :
+---
 
-```bash
-git clone < https://github.com/emmaebrl/linux-project.git >
-cd  linux-project 
+**AroundMe** is an interactive application that helps you explore the surroundings of a street, whether you know its exact name or not. Type in a Parisian street, discover its history, nearby museums, sports facilities, parking areas, and even nearby public restrooms!  
+
+---
+
+## 🚀 Features  
+
+### 🔍 **Detailed street information search:**  
+- 🏛️ **Historical and original name:** Discover the old names and origins of the street.  
+- 🗺️ **Neighborhood and arrondissement:** Dive into the local geographic history.  
+- 📜 **Historical context:** Learn why this street is special!  
+
+### 💡 **Automatic suggestions:**  
+- 📌 **Find the right street, even if you make a mistake.** AroundMe suggests similar names in case of error. Say goodbye to frustration!  
+
+### 🗺️ **Interactive exploration of points of interest:**  
+- 🚻 **Public restrooms**  
+- 🖼️ **Museums**  
+- 🏟️ **Sports facilities**  
+- 🅿️ **Parking areas**  
+
+### 🗺️ **Interactive mapping:**  
+- 🌟 **Intuitive map:** Displays all nearby points of interest.  
+
+### 🖥️ **Two modes of operation:**  
+- ⚙️ **Terminal mode:** Perfect for technical or minimalist users.  
+- 🖼️ **Graphical interface with Streamlit:** Enjoy a modern, smooth, and aesthetic user experience.  
+
+---
+
+## 🛠️ Installation Steps  
+
+### Step 1: Clone the repository  
+
+Clone the repository to your local machine:  
+
+```bash  
+git clone https://github.com/emmaebrl/linux-project.git  
+cd linux-project  
 ```
 
-### Étape 2 : Installer les dépendances et préparer l'environnement
+### Step 2 : Install dependencies and set up the environment
 
-1. Exécutez le script `install.sh` pour vérifier Docker et construire l'image Docker :
+1. Run the "install.sh" script to verify Docker and build the Docker image:
    ```bash
    bash bin/install.sh
    ```
-2. Exécutez le script `run.sh` pour lancer le conteneur Docker et accéder au menu interactif :
+2. Run the "run.sh" script to launch the Docker container and access the interactive menu:
    ```bash
    bash bin/run.sh
    ```
 
-## 📝 Auteurs
+## 📝 Authors
 
-Ce projet a été réalisé par :
+This project was created by:
 
 - **[Emma Eberle](https://github.com/emmaebrl)**
 - **[Sharon Chemmama](https://github.com/Sharon2607)**
@@ -68,5 +71,6 @@ Ce projet a été réalisé par :
 - **[Lina Benzemma](https://github.com/linabnz)** 
 
 
-Si vous avez des questions, suggestions ou remarques, n'hésitez pas à nous contacter via nos profils GitHub ou à ouvrir une issue.
+If you have questions, suggestions, or feedback, feel free to contact us via our GitHub profiles or open an issue.
 
+---
