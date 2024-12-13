@@ -1,26 +1,25 @@
 import streamlit as st
 from utils import get_street_data, display_museum_data, display_parking_data, display_toilet_data, display_sports_data, display_street_info
 
-# Custom styles
 st.markdown("""
     <style>
     body {
-        background-color: #f4f4f9;
+        background-color: #f4f4f9; /* Light neutral background */
     }
     .main-title {
         font-size: 40px;
-        color: #4CAF50;
+        color: #8fbf9c; /* Slightly darker pastel green */
         text-align: center;
         font-family: 'Arial', sans-serif;
     }
     .sub-title {
         font-size: 24px;
-        color: #2196F3;
+        color: #f5a9a7; /* Slightly darker pastel pink */
         text-align: center;
         font-family: 'Arial', sans-serif;
     }
     .stButton>button {
-        background-color: #4CAF50;
+        background-color: #8fbf9c; /* Slightly darker pastel green */
         color: white;
         border-radius: 10px;
         border: none;
@@ -28,7 +27,7 @@ st.markdown("""
         cursor: pointer;
     }
     .stButton>button:hover {
-        background-color: #45a049;
+        background-color: #a8d5ba; /* Original pastel green for hover */
         color: white;
     }
     .footer {
@@ -36,13 +35,15 @@ st.markdown("""
         left: 0;
         bottom: 0;
         width: 100%;
-        background-color: #4CAF50;
+        background-color: #8fbf9c; /* Slightly darker pastel green */
         color: white;
         text-align: center;
         padding: 10px 0;
     }
     </style>
 """, unsafe_allow_html=True)
+
+
 
 # Titles
 st.markdown('<h1 class="main-title">🌟 AroundMe</h1>', unsafe_allow_html=True)
